@@ -1,0 +1,34 @@
+#!/bin/sh
+
+set -e
+
+QUIET=""
+while [ "$1" = "--quiet" ]; do
+  QUIET=1
+  shift
+done
+
+if [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: $0 [--quiet] [--help]
+
+  --quiet    Suppress non-essential output
+  --help     Show this help message
+
+Run the test suite.
+EOF
+  exit 0
+fi
+
+CABAL_OPTS="-j --keep-going"
+if [ -n "$QUIET" ]; then
+  echo "Testing..."
+  CABAL_OPTS="$CABAL_OPTS -v0"
+  cabal $CABAL_OPTS test all \
+    --test-options="--ansi-tricks false --color never --hide-successes" \
+    --test-options="$*"
+else
+  cabal $CABAL_OPTS test all --test-options="$*"
+fi
+
+[ -z "$QUIET" ] || echo "Success!"

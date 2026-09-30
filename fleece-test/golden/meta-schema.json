@@ -1,0 +1,304 @@
+{
+    "$defs": {
+        "AnyJSON": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "number"
+                },
+                {
+                    "items": {
+                        "$ref": "#/$defs/AnyJSON"
+                    },
+                    "type": "array"
+                },
+                {
+                    "additionalProperties": {
+                        "$ref": "#/$defs/AnyJSON"
+                    },
+                    "type": "object"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "Schema": {
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "additionalProperties": {
+                        "$ref": "#/$defs/AnyJSON"
+                    },
+                    "properties": {
+                        "$anchor": {
+                            "type": "string"
+                        },
+                        "$defs": {
+                            "additionalProperties": {
+                                "$ref": "#/$defs/Schema"
+                            },
+                            "type": "object"
+                        },
+                        "$dynamicAnchor": {
+                            "type": "string"
+                        },
+                        "$dynamicRef": {
+                            "type": "string"
+                        },
+                        "$id": {
+                            "type": "string"
+                        },
+                        "$ref": {
+                            "type": "string"
+                        },
+                        "$schema": {
+                            "type": "string"
+                        },
+                        "$vocabulary": {
+                            "additionalProperties": {
+                                "type": "boolean"
+                            },
+                            "type": "object"
+                        },
+                        "additionalProperties": {
+                            "$ref": "#/$defs/Schema"
+                        },
+                        "allOf": {
+                            "items": {
+                                "$ref": "#/$defs/Schema"
+                            },
+                            "minItems": 1,
+                            "type": "array"
+                        },
+                        "anyOf": {
+                            "items": {
+                                "$ref": "#/$defs/Schema"
+                            },
+                            "minItems": 1,
+                            "type": "array"
+                        },
+                        "const": {
+                            "$ref": "#/$defs/AnyJSON"
+                        },
+                        "contains": {
+                            "$ref": "#/$defs/Schema"
+                        },
+                        "dependencies": {
+                            "additionalProperties": {
+                                "anyOf": [
+                                    {
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    {
+                                        "$ref": "#/$defs/Schema"
+                                    }
+                                ]
+                            },
+                            "type": "object"
+                        },
+                        "dependentRequired": {
+                            "additionalProperties": {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            "type": "object"
+                        },
+                        "dependentSchemas": {
+                            "additionalProperties": {
+                                "$ref": "#/$defs/Schema"
+                            },
+                            "type": "object"
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "else": {
+                            "$ref": "#/$defs/Schema"
+                        },
+                        "enum": {
+                            "items": {
+                                "$ref": "#/$defs/AnyJSON"
+                            },
+                            "type": "array"
+                        },
+                        "exclusiveMaximum": {
+                            "type": "number"
+                        },
+                        "exclusiveMinimum": {
+                            "type": "number"
+                        },
+                        "format": {
+                            "type": "string"
+                        },
+                        "if": {
+                            "$ref": "#/$defs/Schema"
+                        },
+                        "items": {
+                            "$ref": "#/$defs/Schema"
+                        },
+                        "maxContains": {
+                            "format": "word",
+                            "maximum": 1.8446744073709551615e19,
+                            "minimum": 0,
+                            "type": "integer"
+                        },
+                        "maxItems": {
+                            "format": "word",
+                            "maximum": 1.8446744073709551615e19,
+                            "minimum": 0,
+                            "type": "integer"
+                        },
+                        "maxLength": {
+                            "format": "word",
+                            "maximum": 1.8446744073709551615e19,
+                            "minimum": 0,
+                            "type": "integer"
+                        },
+                        "maxProperties": {
+                            "format": "word",
+                            "maximum": 1.8446744073709551615e19,
+                            "minimum": 0,
+                            "type": "integer"
+                        },
+                        "maximum": {
+                            "type": "number"
+                        },
+                        "minContains": {
+                            "format": "word",
+                            "maximum": 1.8446744073709551615e19,
+                            "minimum": 0,
+                            "type": "integer"
+                        },
+                        "minItems": {
+                            "format": "word",
+                            "maximum": 1.8446744073709551615e19,
+                            "minimum": 0,
+                            "type": "integer"
+                        },
+                        "minLength": {
+                            "format": "word",
+                            "maximum": 1.8446744073709551615e19,
+                            "minimum": 0,
+                            "type": "integer"
+                        },
+                        "minProperties": {
+                            "format": "word",
+                            "maximum": 1.8446744073709551615e19,
+                            "minimum": 0,
+                            "type": "integer"
+                        },
+                        "minimum": {
+                            "type": "number"
+                        },
+                        "multipleOf": {
+                            "type": "number"
+                        },
+                        "not": {
+                            "$ref": "#/$defs/Schema"
+                        },
+                        "oneOf": {
+                            "items": {
+                                "$ref": "#/$defs/Schema"
+                            },
+                            "minItems": 1,
+                            "type": "array"
+                        },
+                        "pattern": {
+                            "type": "string"
+                        },
+                        "patternProperties": {
+                            "additionalProperties": {
+                                "$ref": "#/$defs/Schema"
+                            },
+                            "type": "object"
+                        },
+                        "prefixItems": {
+                            "items": {
+                                "$ref": "#/$defs/Schema"
+                            },
+                            "minItems": 1,
+                            "type": "array"
+                        },
+                        "properties": {
+                            "additionalProperties": {
+                                "$ref": "#/$defs/Schema"
+                            },
+                            "type": "object"
+                        },
+                        "propertyNames": {
+                            "$ref": "#/$defs/Schema"
+                        },
+                        "required": {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        "then": {
+                            "$ref": "#/$defs/Schema"
+                        },
+                        "title": {
+                            "type": "string"
+                        },
+                        "type": {
+                            "anyOf": [
+                                {
+                                    "enum": [
+                                        "null",
+                                        "boolean",
+                                        "object",
+                                        "array",
+                                        "number",
+                                        "integer",
+                                        "string"
+                                    ],
+                                    "type": "string"
+                                },
+                                {
+                                    "items": {
+                                        "enum": [
+                                            "null",
+                                            "boolean",
+                                            "object",
+                                            "array",
+                                            "number",
+                                            "integer",
+                                            "string"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                }
+                            ]
+                        },
+                        "unevaluatedItems": {
+                            "$ref": "#/$defs/Schema"
+                        },
+                        "unevaluatedProperties": {
+                            "$ref": "#/$defs/Schema"
+                        },
+                        "uniqueItems": {
+                            "type": "boolean"
+                        }
+                    },
+                    "type": "object"
+                }
+            ]
+        }
+    },
+    "$ref": "#/$defs/Schema"
+}

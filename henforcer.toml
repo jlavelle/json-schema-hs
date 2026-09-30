@@ -1,0 +1,502 @@
+[forAnyModule]
+# 1 open unaliased import allowed per module — this slot is for the implicit
+# Prelude import. All explicitly-imported modules are governed by the
+# allowedQualifications rules below, which require qualification.
+allowedOpenUnaliasedImports = 1
+
+[[forAnyModule.allowedQualifications]]
+module = "Control.DeepSeq"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "DeepSeq"
+
+[[forAnyModule.allowedQualifications]]
+module = "Control.Monad"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Monad"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Aeson"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Aeson"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Aeson.Encode.Pretty"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "AesonPretty"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Aeson.Encoding"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Encoding"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Aeson.Key"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Key"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Aeson.KeyMap"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "KeyMap"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Attoparsec.Text"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Atto"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Attoparsec.Time"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "AttoTime"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.ByteString.Lazy"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "LBS"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Char"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Char"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Coerce"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Coerce"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Either"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Either"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.FileEmbed"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "FileEmbed"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Fixed"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Foldable"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Foldable"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Functor"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Functor"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.HashSet"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "HashSet"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Hashable"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Hashable"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Kind"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Kind"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.List.NonEmpty"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "NEL"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Map.Ordered"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "OMap"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Map.Strict"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Map"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Maybe"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Maybe"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Monoid"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Monoid"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Ratio"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Scientific"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Scientific"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Sequence"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Seq"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Set"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Set"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.String"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "String"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Text"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Text"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Typeable"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Typeable"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Text.Read"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "TextRead"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Time"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Time"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Vector"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Vector"
+
+[[forAnyModule.allowedQualifications]]
+module = "Fleece.Aeson"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "FA"
+
+[[forAnyModule.allowedQualifications]]
+module = "Fleece.Core"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "FC"
+
+[[forAnyModule.allowedQualifications]]
+module = "GHC.Generics"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Generics"
+
+[[forAnyModule.allowedQualifications]]
+module = "GHC.TypeLits"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "TypeLits"
+
+[[forAnyModule.allowedQualifications]]
+module = "Hedgehog"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "H"
+
+[[forAnyModule.allowedQualifications]]
+module = "Hedgehog.Gen"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Gen"
+
+[[forAnyModule.allowedQualifications]]
+module = "Hedgehog.Range"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Range"
+
+[[forAnyModule.allowedQualifications]]
+module = "Net.IPv4"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "IPv4"
+
+[[forAnyModule.allowedQualifications]]
+module = "Net.IPv6"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "IPv6"
+
+[[forAnyModule.allowedQualifications]]
+module = "Shrubbery"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+
+[[forAnyModule.allowedQualifications]]
+module = "System.Directory"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Directory"
+
+[[forAnyModule.allowedQualifications]]
+module = "System.FilePath"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "FilePath"
+
+[[forAnyModule.allowedQualifications]]
+module = "Test.Tasty"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Tasty"
+
+[[forAnyModule.allowedQualifications]]
+module = "Test.Tasty.Bench"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Bench"
+
+[[forAnyModule.allowedQualifications]]
+module = "Test.Tasty.Golden"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "TastyG"
+
+[[forAnyModule.allowedQualifications]]
+module = "Test.Tasty.HUnit"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "HUnit"
+
+[[forAnyModule.allowedQualifications]]
+module = "Test.Tasty.Hedgehog"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "TastyH"
+
+[[forAnyModule.allowedQualifications]]
+module = "Text.Regex.TDFA"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Regex"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Schema"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Fleece"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Fleece"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "JSFleece"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Generate"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Generate"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.OrderedProperties"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "OrderedProperties"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Validate"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.Array"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Array"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.Atomic"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Atomic"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.Composition"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Composition"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.Conditional"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Conditional"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.Dialect"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Dialect"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.Error"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Error"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.Format"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Format"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.Numeric"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Numeric"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.Object"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Object"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.Path"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Path"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.Registry"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Registry"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.Uri"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Uri"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.Resolve.Prepass"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Prepass"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.Evaluation"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Evaluation"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.String"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "VString"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.Check"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Check"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.Compile"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Compile"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.Metaschema"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Metaschema"
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchema.Validate.Node"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Node"
+
+[[forAnyModule.allowedQualifications]]
+module = "GenerateTests"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+
+[[forAnyModule.allowedQualifications]]
+module = "CodecTests"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+
+[[forAnyModule.allowedQualifications]]
+module = "SchemaGen"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+
+[[forAnyModule.allowedQualifications]]
+module = "JsonSchemaGoldenTest"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+
+[[forAnyModule.allowedQualifications]]
+module = "ReferenceTests"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+
+[[forAnyModule.allowedQualifications]]
+module = "Test"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+
+[[forAnyModule.allowedQualifications]]
+module = "TestUtil"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }

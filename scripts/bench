@@ -1,0 +1,58 @@
+#!/bin/sh
+
+set -e
+
+QUIET=""
+while [ "$1" = "--quiet" ]; do
+  QUIET=1
+  shift
+done
+
+if [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: $0 [--quiet] {save|compare} [extra-args...]
+
+  --quiet    Suppress non-essential output
+  --help     Show this help message
+
+  save       Build and run benchmarks, saving results as the baseline
+  compare    Build and run benchmarks, comparing against the saved baseline
+EOF
+  exit 0
+fi
+
+SUBCOMMAND="$1"
+shift || true
+
+BASELINE_DIR="$PWD/bench/baselines"
+BASELINE_FILE="$BASELINE_DIR/baseline.csv"
+
+case "$SUBCOMMAND" in
+  save)
+    BENCH_OPT="--csv $BASELINE_FILE"
+    ;;
+  compare)
+    if [ ! -f "$BASELINE_FILE" ]; then
+      echo "No baseline found at $BASELINE_FILE — run 'scripts/bench save' first" >&2
+      exit 1
+    fi
+    BENCH_OPT="--baseline $BASELINE_FILE"
+    ;;
+  *)
+    echo "Usage: $0 [--quiet] {save|compare} [extra-args...]" >&2
+    exit 1
+    ;;
+esac
+
+mkdir -p "$BASELINE_DIR"
+
+BUILD_OPTS="--enable-benchmarks -j"
+[ -n "$QUIET" ] && BUILD_OPTS="$BUILD_OPTS -v0"
+
+BENCH_CABAL_OPTS=""
+[ -n "$QUIET" ] && BENCH_CABAL_OPTS="-v0"
+
+cabal build all $BUILD_OPTS
+cabal $BENCH_CABAL_OPTS bench all --benchmark-options="$BENCH_OPT $*"
+
+[ -z "$QUIET" ] || echo "Done."

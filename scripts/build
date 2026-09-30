@@ -1,0 +1,50 @@
+#!/bin/sh
+
+set -e
+
+QUIET=""
+while [ "$1" = "--quiet" ]; do
+  QUIET=1
+  shift
+done
+
+if [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: $0 [--quiet] [--help]
+
+  --quiet    Suppress non-essential output
+  --help     Show this help message
+
+Build the project.
+EOF
+  exit 0
+fi
+
+if [ -f fourmolu.yaml ]; then
+  git ls-files -z '*.hs' | xargs -0 fourmolu -i
+fi
+
+if command -v cabal-gild > /dev/null 2>&1; then
+  cabal-gild json-schema-hs.cabal
+fi
+
+if [ -f .hlint.yaml ]; then
+  [ -n "$QUIET" ] && echo "Linting..."
+
+  HLINT_OPTS="-j --cross"
+  [ -n "$QUIET" ] && HLINT_OPTS="$HLINT_OPTS -c=never"
+
+  if ! git ls-files -z '*.hs' | xargs -0 hlint $HLINT_OPTS; then
+    echo "Linting failed! Address all hints before rebuilding."
+    exit 1
+  fi
+fi
+
+[ -n "$QUIET" ] && echo "Building..."
+
+CABAL_OPTS="--enable-benchmarks --keep-going -j"
+[ -n "$QUIET" ] && CABAL_OPTS="$CABAL_OPTS -v0"
+
+cabal build all $CABAL_OPTS
+
+[ -z "$QUIET" ] || echo "Success!"

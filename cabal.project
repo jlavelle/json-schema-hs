@@ -1,0 +1,29 @@
+packages: .
+
+tests: True
+
+package json-schema-hs
+  flags: +ci
+
+source-repository-package
+  type: git
+  location: https://github.com/flipstone/json-fleece.git
+  tag: b3096c27919b89bfe7cc960462f9c55613cc3170
+  subdir:
+    json-fleece-core
+    json-fleece-aeson
+
+source-repository-package
+  type: git
+  location: https://github.com/flipstone/shrubbery.git
+  tag: 502769064b62b215a332a2ba6725f0c71ca8883b
+
+source-repository-package
+  type: git
+  location: https://github.com/flipstone/bounded-text.git
+  tag: 3ef94eeda5402857423284d0c4e021a8c8032498
+
+source-repository-package
+  type: git
+  location: https://github.com/flipstone/henforcer.git
+  tag: befaba9bce1fcb531e47f59901eb26a7c6a56e02

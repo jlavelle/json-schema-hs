@@ -1,0 +1,78 @@
+# To avoid errors from quasiquoted strings
+- arguments: [-XNoCPP]
+
+# Enable disabled-by-default groups
+- group: {name: future, enabled: true}
+- group: {name: generalise, enabled: true}
+- group: {name: generalise-for-conciseness, enabled: true}
+# Custom partial function rules that suggest Foldable1 alternatives.
+# Applying these will require restructuring code so that a Foldable1
+# constraint is available (e.g. by changing Foldable t => ... to
+# Foldable1 t => ..., or by switching the container type to one with
+# a Foldable1 instance like NonEmpty).
+- group:
+    name: use-foldable1
+    enabled: true
+    imports:
+    - package base
+    rules:
+
+    # Data.Foldable / Prelude — qualified so the Data.Foldable1 versions
+    # (already total) don't trigger their own replacement rules.
+
+    - warn: {lhs: Prelude.foldr1, rhs: Data.Foldable1.foldr1, name: "Use Foldable1.foldr1 instead of partial foldr1", note: "Requires a Foldable1 constraint instead of Foldable. Consider restructuring so that the container is known to be non-empty."}
+    - warn: {lhs: Data.Foldable.foldr1, rhs: Data.Foldable1.foldr1, name: "Use Foldable1.foldr1 instead of partial foldr1", note: "Requires a Foldable1 constraint instead of Foldable. Consider restructuring so that the container is known to be non-empty."}
+    - warn: {lhs: Prelude.foldl1, rhs: Data.Foldable1.foldl1, name: "Use Foldable1.foldl1 instead of partial foldl1", note: "Requires a Foldable1 constraint instead of Foldable. Consider restructuring so that the container is known to be non-empty."}
+    - warn: {lhs: Data.Foldable.foldl1, rhs: Data.Foldable1.foldl1, name: "Use Foldable1.foldl1 instead of partial foldl1", note: "Requires a Foldable1 constraint instead of Foldable. Consider restructuring so that the container is known to be non-empty."}
+    - warn: {lhs: Prelude.maximum, rhs: Data.Foldable1.maximum, name: "Use Foldable1.maximum instead of partial maximum", note: "Requires a Foldable1 constraint instead of Foldable. Consider restructuring so that the container is known to be non-empty."}
+    - warn: {lhs: Data.Foldable.maximum, rhs: Data.Foldable1.maximum, name: "Use Foldable1.maximum instead of partial maximum", note: "Requires a Foldable1 constraint instead of Foldable. Consider restructuring so that the container is known to be non-empty."}
+    - warn: {lhs: Prelude.minimum, rhs: Data.Foldable1.minimum, name: "Use Foldable1.minimum instead of partial minimum", note: "Requires a Foldable1 constraint instead of Foldable. Consider restructuring so that the container is known to be non-empty."}
+    - warn: {lhs: Data.Foldable.minimum, rhs: Data.Foldable1.minimum, name: "Use Foldable1.minimum instead of partial minimum", note: "Requires a Foldable1 constraint instead of Foldable. Consider restructuring so that the container is known to be non-empty."}
+    - warn: {lhs: Data.List.maximumBy, rhs: Data.Foldable1.maximumBy, name: "Use Foldable1.maximumBy instead of partial maximumBy", note: "Requires a Foldable1 constraint instead of Foldable. Consider restructuring so that the container is known to be non-empty."}
+    - warn: {lhs: Data.Foldable.maximumBy, rhs: Data.Foldable1.maximumBy, name: "Use Foldable1.maximumBy instead of partial maximumBy", note: "Requires a Foldable1 constraint instead of Foldable. Consider restructuring so that the container is known to be non-empty."}
+    - warn: {lhs: Data.List.minimumBy, rhs: Data.Foldable1.minimumBy, name: "Use Foldable1.minimumBy instead of partial minimumBy", note: "Requires a Foldable1 constraint instead of Foldable. Consider restructuring so that the container is known to be non-empty."}
+    - warn: {lhs: Data.Foldable.minimumBy, rhs: Data.Foldable1.minimumBy, name: "Use Foldable1.minimumBy instead of partial minimumBy", note: "Requires a Foldable1 constraint instead of Foldable. Consider restructuring so that the container is known to be non-empty."}
+
+    # Remaining partial functions without Foldable1 equivalents.
+    # tail/init are scoped to Prelude/Data.List so the total
+    # Data.List.NonEmpty.{tail,init} variants don't trigger.
+    - warn: {lhs: Prelude.tail l, rhs: "case l of _:xs -> xs; [] -> error _", name: Avoid partial function, side: not (isNonEmpty l)}
+    - warn: {lhs: Data.List.tail l, rhs: "case l of _:xs -> xs; [] -> error _", name: Avoid partial function, side: not (isNonEmpty l)}
+    - warn: {lhs: Prelude.init l, rhs: "case reverse l of _:xs -> reverse xs; [] -> error _", name: Avoid partial function, side: not (isNonEmpty l)}
+    - warn: {lhs: Data.List.init l, rhs: "case reverse l of _:xs -> reverse xs; [] -> error _", name: Avoid partial function, side: not (isNonEmpty l)}
+    - warn: {lhs: l !! n, rhs: "case drop n l of x:_ -> x; [] -> error _", name: Avoid partial function}
+    - warn: {lhs: Data.List.NonEmpty.fromList l, rhs: "case nonEmpty l of Just xs -> xs; Nothing -> error _", name: Avoid partial function}
+    - warn: {lhs: fromJust v, rhs: "case v of Just x -> x; Nothing -> error _", name: Avoid partial function}
+- group: {name: dollar, enabled: true}
+
+# Ignored hints
+- ignore: {name: Use record patterns}
+- ignore: {name: Use lambda-case}
+- ignore: {name: Use tuple-section}
+- ignore: {name: Use first}
+- ignore: {name: Use uncurry}
+- ignore: {name: Use curry}
+- ignore: {name: "Use <$>"}
+
+# Additional warnings
+- warn: {name: Use explicit module export list}
+- warn: {lhs: mapM_, rhs: traverse_}
+- warn: {lhs: mapM, rhs: traverse}
+- warn: {lhs: concatMap, rhs: foldMap}
+- warn: {lhs: mconcat, rhs: fold}
+- warn: {lhs: concat, rhs: fold}
+- warn: {lhs: forM, rhs: for}
+- warn: {lhs: forM_, rhs: for_}
+- warn: {lhs: sequence, rhs: sequenceA}
+- warn: {lhs: sequence_, rhs: sequenceA_}
+- warn: {lhs: liftM, rhs: fmap}
+- warn: {lhs: liftM2, rhs: liftA2}
+- warn: {lhs: a >> b, rhs: a *> b}
+
+# Banned functions
+- functions:
+  - {name: Data.List.nub, within: []}
+  - {name: Data.List.nubBy, within: []}
+  - {name: Prelude.head, within: [], message: "Use NonEmpty with Data.Foldable1.head, or pattern match"}
+  - {name: Prelude.last, within: [], message: "Use NonEmpty with Data.Foldable1.last, or pattern match"}
+  - {name: unsafePerformIO, within: []}
