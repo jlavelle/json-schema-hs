@@ -13,6 +13,7 @@ import Data.List.NonEmpty qualified as NEL
 import Data.Map.Ordered qualified as OMap
 import Data.Map.Strict qualified as Map
 import Data.Maybe qualified as Maybe
+import Data.NonEmptyText qualified as NET
 import Data.Proxy (Proxy (Proxy), asProxyTypeOf)
 import Data.Scientific qualified as Scientific
 import Data.Sequence qualified as Seq
@@ -82,6 +83,9 @@ instance FC.Fleece JsonSchemaGen where
         )
         defs
         refs
+
+  interpretDescribe description =
+    constrained (\obj -> obj{Schema.schemaDescription = Just (NET.toText description)})
 
   interpretFormat formatString =
     constrained (\obj -> obj{Schema.schemaFormat = Just (Text.pack formatString)})

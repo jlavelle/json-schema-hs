@@ -35,61 +35,78 @@
                 },
                 {
                     "additionalProperties": {
-                        "$ref": "#/$defs/AnyJSON"
+                        "$ref": "#/$defs/AnyJSON",
+                        "description": "An arbitrary JSON value"
                     },
                     "properties": {
                         "$anchor": {
+                            "description": "Declares a plain name fragment for referencing with $ref",
                             "type": "string"
                         },
                         "$defs": {
                             "additionalProperties": {
-                                "$ref": "#/$defs/Schema"
+                                "$ref": "#/$defs/Schema",
+                                "description": "A JSON Schema, either a boolean or a schema object"
                             },
+                            "description": "Reusable schema definitions, referenced via $ref",
                             "type": "object"
                         },
                         "$dynamicAnchor": {
+                            "description": "Declares a dynamic anchor for resolution with $dynamicRef",
                             "type": "string"
                         },
                         "$dynamicRef": {
+                            "description": "Dynamically references another schema, resolved via the dynamic scope",
                             "type": "string"
                         },
                         "$id": {
+                            "description": "Declares a base URI for the schema",
                             "type": "string"
                         },
                         "$ref": {
+                            "description": "References another schema by URI",
                             "type": "string"
                         },
                         "$schema": {
+                            "description": "URI of the metaschema (dialect) for this schema",
                             "type": "string"
                         },
                         "$vocabulary": {
                             "additionalProperties": {
                                 "type": "boolean"
                             },
+                            "description": "Vocabularies declared by a metaschema, with required flags",
                             "type": "object"
                         },
                         "additionalProperties": {
-                            "$ref": "#/$defs/Schema"
+                            "$ref": "#/$defs/Schema",
+                            "description": "Schema for properties not matched by 'properties' or 'patternProperties'"
                         },
                         "allOf": {
+                            "description": "The instance must validate against all of these schemas",
                             "items": {
-                                "$ref": "#/$defs/Schema"
+                                "$ref": "#/$defs/Schema",
+                                "description": "A JSON Schema, either a boolean or a schema object"
                             },
                             "minItems": 1,
                             "type": "array"
                         },
                         "anyOf": {
+                            "description": "The instance must validate against at least one of these schemas",
                             "items": {
-                                "$ref": "#/$defs/Schema"
+                                "$ref": "#/$defs/Schema",
+                                "description": "A JSON Schema, either a boolean or a schema object"
                             },
                             "minItems": 1,
                             "type": "array"
                         },
                         "const": {
-                            "$ref": "#/$defs/AnyJSON"
+                            "$ref": "#/$defs/AnyJSON",
+                            "description": "Restricts the instance to a single value"
                         },
                         "contains": {
-                            "$ref": "#/$defs/Schema"
+                            "$ref": "#/$defs/Schema",
+                            "description": "Requires at least one array item to validate against this schema"
                         },
                         "dependencies": {
                             "additionalProperties": {
@@ -101,10 +118,13 @@
                                         "type": "array"
                                     },
                                     {
-                                        "$ref": "#/$defs/Schema"
+                                        "$ref": "#/$defs/Schema",
+                                        "description": "A JSON Schema, either a boolean or a schema object"
                                     }
-                                ]
+                                ],
+                                "description": "A dependency, either a list of required property names or a schema"
                             },
+                            "description": "Legacy keyword combining dependentSchemas and dependentRequired",
                             "type": "object"
                         },
                         "dependentRequired": {
@@ -114,148 +134,186 @@
                                 },
                                 "type": "array"
                             },
+                            "description": "Property names that must be present when their corresponding property is present",
                             "type": "object"
                         },
                         "dependentSchemas": {
                             "additionalProperties": {
-                                "$ref": "#/$defs/Schema"
+                                "$ref": "#/$defs/Schema",
+                                "description": "A JSON Schema, either a boolean or a schema object"
                             },
+                            "description": "Schemas that apply when their corresponding property is present",
                             "type": "object"
                         },
                         "description": {
+                            "description": "Detailed human-readable explanation of the schema's purpose",
                             "type": "string"
                         },
                         "else": {
-                            "$ref": "#/$defs/Schema"
+                            "$ref": "#/$defs/Schema",
+                            "description": "Schema applied when 'if' does not validate successfully"
                         },
                         "enum": {
+                            "description": "Restricts the instance to a fixed set of values",
                             "items": {
-                                "$ref": "#/$defs/AnyJSON"
+                                "$ref": "#/$defs/AnyJSON",
+                                "description": "An arbitrary JSON value"
                             },
                             "type": "array"
                         },
                         "exclusiveMaximum": {
+                            "description": "Exclusive upper bound for the numeric instance",
                             "type": "number"
                         },
                         "exclusiveMinimum": {
+                            "description": "Exclusive lower bound for the numeric instance",
                             "type": "number"
                         },
                         "format": {
+                            "description": "Semantic format identifier for the string instance (e.g. 'date-time', 'email')",
                             "type": "string"
                         },
                         "if": {
-                            "$ref": "#/$defs/Schema"
+                            "$ref": "#/$defs/Schema",
+                            "description": "Condition schema for conditional validation with 'then' and 'else'"
                         },
                         "items": {
-                            "$ref": "#/$defs/Schema"
+                            "$ref": "#/$defs/Schema",
+                            "description": "Schema for array items not covered by 'prefixItems'"
                         },
                         "maxContains": {
+                            "description": "Maximum number of array items that may validate against 'contains'",
                             "format": "word",
                             "maximum": 1.8446744073709551615e19,
                             "minimum": 0,
                             "type": "integer"
                         },
                         "maxItems": {
+                            "description": "Maximum number of items in the array instance",
                             "format": "word",
                             "maximum": 1.8446744073709551615e19,
                             "minimum": 0,
                             "type": "integer"
                         },
                         "maxLength": {
+                            "description": "Maximum length of the string instance",
                             "format": "word",
                             "maximum": 1.8446744073709551615e19,
                             "minimum": 0,
                             "type": "integer"
                         },
                         "maxProperties": {
+                            "description": "Maximum number of properties in the object instance",
                             "format": "word",
                             "maximum": 1.8446744073709551615e19,
                             "minimum": 0,
                             "type": "integer"
                         },
                         "maximum": {
+                            "description": "Inclusive upper bound for the numeric instance",
                             "type": "number"
                         },
                         "minContains": {
+                            "description": "Minimum number of array items that must validate against 'contains'",
                             "format": "word",
                             "maximum": 1.8446744073709551615e19,
                             "minimum": 0,
                             "type": "integer"
                         },
                         "minItems": {
+                            "description": "Minimum number of items in the array instance",
                             "format": "word",
                             "maximum": 1.8446744073709551615e19,
                             "minimum": 0,
                             "type": "integer"
                         },
                         "minLength": {
+                            "description": "Minimum length of the string instance",
                             "format": "word",
                             "maximum": 1.8446744073709551615e19,
                             "minimum": 0,
                             "type": "integer"
                         },
                         "minProperties": {
+                            "description": "Minimum number of properties in the object instance",
                             "format": "word",
                             "maximum": 1.8446744073709551615e19,
                             "minimum": 0,
                             "type": "integer"
                         },
                         "minimum": {
+                            "description": "Inclusive lower bound for the numeric instance",
                             "type": "number"
                         },
                         "multipleOf": {
+                            "description": "The numeric instance must be a multiple of this value (strictly positive)",
                             "type": "number"
                         },
                         "not": {
-                            "$ref": "#/$defs/Schema"
+                            "$ref": "#/$defs/Schema",
+                            "description": "The instance must not validate against this schema"
                         },
                         "oneOf": {
+                            "description": "The instance must validate against exactly one of these schemas",
                             "items": {
-                                "$ref": "#/$defs/Schema"
+                                "$ref": "#/$defs/Schema",
+                                "description": "A JSON Schema, either a boolean or a schema object"
                             },
                             "minItems": 1,
                             "type": "array"
                         },
                         "pattern": {
+                            "description": "ECMA-262 regular expression that the string instance must match",
                             "type": "string"
                         },
                         "patternProperties": {
                             "additionalProperties": {
-                                "$ref": "#/$defs/Schema"
+                                "$ref": "#/$defs/Schema",
+                                "description": "A JSON Schema, either a boolean or a schema object"
                             },
+                            "description": "Validation rules for object properties matched by regular expression",
                             "type": "object"
                         },
                         "prefixItems": {
+                            "description": "Positional schemas for validating array items by index",
                             "items": {
-                                "$ref": "#/$defs/Schema"
+                                "$ref": "#/$defs/Schema",
+                                "description": "A JSON Schema, either a boolean or a schema object"
                             },
                             "minItems": 1,
                             "type": "array"
                         },
                         "properties": {
                             "additionalProperties": {
-                                "$ref": "#/$defs/Schema"
+                                "$ref": "#/$defs/Schema",
+                                "description": "A JSON Schema, either a boolean or a schema object"
                             },
+                            "description": "Validation rules for known object properties, matched by exact name",
                             "type": "object"
                         },
                         "propertyNames": {
-                            "$ref": "#/$defs/Schema"
+                            "$ref": "#/$defs/Schema",
+                            "description": "Schema that all property names must validate against"
                         },
                         "required": {
+                            "description": "Properties that must be present in the object instance",
                             "items": {
                                 "type": "string"
                             },
                             "type": "array"
                         },
                         "then": {
-                            "$ref": "#/$defs/Schema"
+                            "$ref": "#/$defs/Schema",
+                            "description": "Schema applied when 'if' validates successfully"
                         },
                         "title": {
+                            "description": "Short human-readable label for the schema",
                             "type": "string"
                         },
                         "type": {
                             "anyOf": [
                                 {
+                                    "description": "A JSON Schema primitive type name",
                                     "enum": [
                                         "null",
                                         "boolean",
@@ -269,6 +327,7 @@
                                 },
                                 {
                                     "items": {
+                                        "description": "A JSON Schema primitive type name",
                                         "enum": [
                                             "null",
                                             "boolean",
@@ -283,15 +342,19 @@
                                     "minItems": 1,
                                     "type": "array"
                                 }
-                            ]
+                            ],
+                            "description": "Restricts the instance to one or more primitive types"
                         },
                         "unevaluatedItems": {
-                            "$ref": "#/$defs/Schema"
+                            "$ref": "#/$defs/Schema",
+                            "description": "Schema for array items not evaluated by adjacent 'prefixItems', 'items', or 'contains'"
                         },
                         "unevaluatedProperties": {
-                            "$ref": "#/$defs/Schema"
+                            "$ref": "#/$defs/Schema",
+                            "description": "Schema for properties not evaluated by adjacent 'properties', 'patternProperties', or 'additionalProperties'"
                         },
                         "uniqueItems": {
+                            "description": "When true, all array items must be distinct",
                             "type": "boolean"
                         }
                     },
@@ -300,5 +363,6 @@
             ]
         }
     },
-    "$ref": "#/$defs/Schema"
+    "$ref": "#/$defs/Schema",
+    "description": "A JSON Schema, either a boolean or a schema object"
 }

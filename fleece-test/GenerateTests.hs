@@ -35,6 +35,7 @@ generateTests =
         , HUnit.testCase "null" testNullSchema
         , HUnit.testCase "int32" testInt32Schema
         , HUnit.testCase "double" testDoubleSchema
+        , HUnit.testCase "describe" testDescribeSchema
         ]
     , Tasty.testGroup
         "objects"
@@ -126,6 +127,16 @@ testNullSchema = do
     schema = schemaFor FC.null
   assertValidates "null validates null" schema Aeson.Null
   assertRejects "null rejects string" schema (Aeson.String "x")
+
+testDescribeSchema :: HUnit.Assertion
+testDescribeSchema = do
+  let
+    schema = schemaFor (FC.describe "A name" FC.text)
+  case schema of
+    Schema.ObjectSchema obj -> do
+      HUnit.assertEqual "describe emits description" (Just "A name") (Schema.schemaDescription obj)
+      HUnit.assertEqual "describe keeps type" (Just (NEL.singleton Schema.TypeString)) (Schema.schemaType obj)
+    Schema.BoolSchema _ -> HUnit.assertFailure "expected object schema"
 
 testInt32Schema :: HUnit.Assertion
 testInt32Schema = do
