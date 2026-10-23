@@ -3,7 +3,7 @@ name: json-schema-hs
 description: >-
   Validate JSON against JSON Schema draft 2020-12 in Haskell with
   json-schema-hs, and decode, encode, or generate schemas through
-  json-fleece with json-schema-hs:fleece. Use when reading or writing `.hs`
+  json-fleece with json-schema-hs-fleece. Use when reading or writing `.hs`
   code that imports `JsonSchema`, `JsonSchema.Validate`, `JsonSchema.Fleece`,
   `JsonSchema.Generate`, or `JsonSchema.OrderedDecoder`; when the user wants
   to validate an `Aeson.Value` against a schema, resolve `$ref`s to other
@@ -33,13 +33,16 @@ Worked examples for every pattern below live in [`references/Example.hs`](refere
 
 ## Provisioning
 
-Not on Hackage. The `json-schema-hs` package has two public libraries. Depend on `json-schema-hs` for `JsonSchema` and `JsonSchema.Validate`. Depend on `json-schema-hs:fleece` for the `JsonSchema.Fleece`, `JsonSchema.Generate`, and `JsonSchema.OrderedDecoder` modules, which also need the `json-fleece`, `shrubbery`, and `bounded-text` pins from the `json-fleece` skill.
+Not on Hackage. Depend on the `json-schema-hs` package for `JsonSchema` and `JsonSchema.Validate`. Depend on the `json-schema-hs-fleece` package for the `JsonSchema.Fleece`, `JsonSchema.Generate`, and `JsonSchema.OrderedDecoder` modules. Only `json-schema-hs-fleece` needs the `json-fleece`, `shrubbery`, and `bounded-text` pins from the `json-fleece` skill. List the subdirectory of each package you use.
 
 ```cabal
 source-repository-package
   type: git
   location: https://github.com/flipstone/json-schema-hs.git
   tag: <main SHA>
+  subdir:
+    json-schema-hs
+    json-schema-hs-fleece
 ```
 
 ## API Reference

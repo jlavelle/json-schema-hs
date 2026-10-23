@@ -86,4 +86,4 @@ findJsonFiles dir = do
         entries
 
 testSuitePath :: FilePath -> FilePath
-testSuitePath = (FilePath.</>) "JSON-Schema-Test-Suite"
+testSuitePath = (FilePath.</>) "../JSON-Schema-Test-Suite"

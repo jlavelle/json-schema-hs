@@ -10,9 +10,9 @@ import Data.Map.Ordered qualified as OMap
 import Data.Set qualified as Set
 import Data.Text qualified as Text
 import Data.Vector qualified as Vector
-import JsonSchema qualified as Schema
 
 import Bench.Common qualified as Common
+import JsonSchema qualified as Schema
 import JsonSchema.Validate qualified as Validate
 
 main :: IO ()

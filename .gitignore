@@ -5,5 +5,5 @@ tmp/
 .hie/
 dist-newstyle/
 cabal.project.local
-bench/baselines/
+json-schema-hs/bench/baselines/
 .scratch/

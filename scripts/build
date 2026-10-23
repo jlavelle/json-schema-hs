@@ -25,7 +25,7 @@ if [ -f fourmolu.yaml ]; then
 fi
 
 if command -v cabal-gild > /dev/null 2>&1; then
-  cabal-gild json-schema-hs.cabal
+  cabal-gild */*.cabal
 fi
 
 if [ -f .hlint.yaml ]; then

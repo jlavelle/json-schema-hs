@@ -1,6 +1,10 @@
 # json-schema-hs
 
-A Haskell implementation of JSON Schema draft 2020-12. The `json-schema-hs` library has the validator and an aeson codec for schemas. The `json-schema-hs:fleece` sublibrary has a [json-fleece](https://github.com/flipstone/json-fleece) codec for schemas, a Fleece decoder that keeps the key order of `properties`, `$defs` and the other keyword maps, and a Fleece backend that generates schemas. Internals are in the `json-schema-hs:core` sublibrary, and the private `test-util` sublibrary has the helpers shared by both test suites.
+A Haskell implementation of JSON Schema draft 2020-12, in three packages:
+
+- **json-schema-hs**: the validator and an aeson codec for schemas. Internals are in its public `json-schema-hs:core` sublibrary.
+- **json-schema-hs-fleece**: a [json-fleece](https://github.com/flipstone/json-fleece) codec for schemas, a Fleece decoder that keeps the key order of `properties`, `$defs` and the other keyword maps, and a Fleece backend that generates schemas. Only dependents of this package need json-fleece.
+- **json-schema-hs-test**: the test suites of both packages, and the helpers they share. It is not meant for release. The test suites live outside the packages they test because cabal cannot solve a test suite that depends, through the shared helpers, on its own package.
 
 ## Quickstart
 

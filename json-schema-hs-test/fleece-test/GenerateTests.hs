@@ -16,12 +16,12 @@ import Hedgehog qualified as H
 import Hedgehog.Gen qualified as Gen
 import Hedgehog.Range qualified as Range
 import JsonSchema qualified as Schema
+import JsonSchema.Generate qualified as Generate
 import Test.Tasty qualified as Tasty
 import Test.Tasty.HUnit qualified as HUnit
 import Test.Tasty.Hedgehog qualified as TastyH
-import TestUtil qualified
 
-import JsonSchema.Generate qualified as Generate
+import TestUtil qualified
 
 generateTests :: Tasty.TestTree
 generateTests =
