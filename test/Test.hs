@@ -14,6 +14,7 @@ import Data.Map.Strict qualified as Map
 import Data.Maybe qualified as Maybe
 import Data.Scientific qualified as Scientific
 import Data.Set qualified as Set
+import Data.Set.Ordered qualified as OSet
 import Data.Text qualified as Text
 import Data.Vector qualified as Vector
 import Hedgehog qualified as H
@@ -1146,7 +1147,7 @@ propRequiredPresent = H.property $ do
   key <- H.forAll SchemaGen.genFieldName
   value <- H.forAll SchemaGen.genJsonValue
   let
-    schema = Schema.ObjectSchema Schema.emptySchema{Schema.schemaRequired = Just (Set.singleton key)}
+    schema = Schema.ObjectSchema Schema.emptySchema{Schema.schemaRequired = Just (OSet.singleton key)}
     obj = KeyMap.singleton (Key.fromText key) value
   ok <- validatesProp schema (Aeson.Object obj)
   H.assert ok
@@ -1154,7 +1155,7 @@ propRequiredPresent = H.property $ do
 testRequiredMissing :: HUnit.Assertion
 testRequiredMissing =
   let
-    schema = Schema.ObjectSchema Schema.emptySchema{Schema.schemaRequired = Just (Set.singleton (Text.pack "missing"))}
+    schema = Schema.ObjectSchema Schema.emptySchema{Schema.schemaRequired = Just (OSet.singleton (Text.pack "missing"))}
    in
     assertRejects "missing required property rejected" schema (Aeson.Object KeyMap.empty)
 
@@ -3150,7 +3151,7 @@ testRequiredErrorDetails =
     schema =
       Schema.ObjectSchema
         Schema.emptySchema
-          { Schema.schemaRequired = Just (Set.fromList [Text.pack "name", Text.pack "age"])
+          { Schema.schemaRequired = Just (OSet.fromList [Text.pack "name", Text.pack "age"])
           }
     errors = TestUtil.validatePure schema (Aeson.Object KeyMap.empty)
     missing =
@@ -3308,7 +3309,7 @@ testDependentSchemasErrorDetails =
                     [
                       ( Text.pack "foo"
                       , Schema.ObjectSchema
-                          Schema.emptySchema{Schema.schemaRequired = Just (Set.singleton (Text.pack "bar"))}
+                          Schema.emptySchema{Schema.schemaRequired = Just (OSet.singleton (Text.pack "bar"))}
                       )
                     ]
                 )
@@ -3680,7 +3681,7 @@ propRenderJsonPointerRoundTrip = H.property $ do
 testRenderErrorsNewlines :: HUnit.Assertion
 testRenderErrorsNewlines = do
   let
-    schema = Schema.ObjectSchema Schema.emptySchema{Schema.schemaRequired = Just (Set.fromList [Text.pack "a", Text.pack "b"])}
+    schema = Schema.ObjectSchema Schema.emptySchema{Schema.schemaRequired = Just (OSet.fromList [Text.pack "a", Text.pack "b"])}
     errors = TestUtil.validatePure schema (jsonObject [])
     newlines = Text.count (Text.pack "\n")
   Validate.renderErrors [] HUnit.@?= Text.empty

@@ -26,7 +26,7 @@ import Data.ByteString.Lazy qualified as LBS
 import Data.Foldable qualified as Foldable
 import Data.List.NonEmpty qualified as NEL
 import Data.Map.Ordered qualified as OMap
-import Data.Set qualified as Set
+import Data.Set.Ordered qualified as OSet
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
 import Fleece.Aeson qualified as FA
@@ -154,7 +154,7 @@ handBuiltSchema =
                 , ("age", Schema.ObjectSchema Schema.emptySchema{Schema.schemaMinimum = Just 0})
                 ]
             )
-      , Schema.schemaRequired = Just (Set.fromList ["name"])
+      , Schema.schemaRequired = Just (OSet.fromList ["name"])
       }
 
 main :: IO ()

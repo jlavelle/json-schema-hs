@@ -7,9 +7,10 @@ module JsonSchema.Fleece
   ) where
 
 import Data.Aeson qualified as Aeson
+import Data.Foldable qualified as Foldable
 import Data.List.NonEmpty qualified as NEL
 import Data.Map.Strict qualified as Map
-import Data.Set qualified as Set
+import Data.Set.Ordered qualified as OSet
 import Data.Text qualified as Text
 import Data.Typeable qualified as Typeable
 import Fleece.Aeson qualified as FA
@@ -280,9 +281,9 @@ valueSchema :: (FC.Fleece f) => FC.Schema f Aeson.Value
 valueSchema =
   FC.describe "An arbitrary JSON value" FA.aesonValue
 
-requiredFleeceSchema :: (FC.Fleece f) => FC.Schema f (Set.Set Text.Text)
+requiredFleeceSchema :: (FC.Fleece f) => FC.Schema f (OSet.OSet Text.Text)
 requiredFleeceSchema =
-  FC.set FC.RejectInputDuplicates FC.text
+  FC.validate Foldable.toList Schema.validateRequired (FC.list FC.text)
 
 multipleOfFleeceSchema :: (FC.Fleece f) => FC.Schema f Schema.PositiveScientific
 multipleOfFleeceSchema =

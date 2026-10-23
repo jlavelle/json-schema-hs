@@ -18,6 +18,7 @@ import Data.Proxy (Proxy (Proxy), asProxyTypeOf)
 import Data.Scientific qualified as Scientific
 import Data.Sequence qualified as Seq
 import Data.Set qualified as Set
+import Data.Set.Ordered qualified as OSet
 import Data.Text qualified as Text
 import Data.Word (Word16, Word32, Word64, Word8)
 import Fleece.Core qualified as FC
@@ -191,13 +192,13 @@ instance FC.Fleece JsonSchemaGen where
                     { Schema.schemaConst = Just (Aeson.String tagValue)
                     }
               existingProps = Maybe.fromMaybe OMap.empty (Schema.schemaProperties obj)
-              existingReq = Foldable.fold (Schema.schemaRequired obj)
+              existingReq = Maybe.fromMaybe OSet.empty (Schema.schemaRequired obj)
              in
               GenResult
                 ( Schema.ObjectSchema
                     obj
                       { Schema.schemaProperties = Just (existingProps OMap.|> (tagPropName, tagConstSchema))
-                      , Schema.schemaRequired = Just (Set.insert tagPropName existingReq)
+                      , Schema.schemaRequired = Just (existingReq OSet.|> tagPropName)
                       }
                 )
                 defs
@@ -381,7 +382,7 @@ objectAccumSchema requiredNames accum =
       , Schema.schemaRequired =
           if Seq.null requiredNames
             then Nothing
-            else Just (foldr Set.insert Set.empty requiredNames)
+            else Just (OSet.fromList (Foldable.toList requiredNames))
       , Schema.schemaAdditionalProperties = accumAdditionalSchema accum
       }
 

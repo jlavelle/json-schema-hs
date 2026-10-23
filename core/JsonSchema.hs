@@ -16,6 +16,7 @@ module JsonSchema
   , MetaschemaUri (..)
   , schemaTypeToText
   , validateMultipleOf
+  , validateRequired
   , validateSchemaId
   , validateAnchorName
   , emptySchema
@@ -35,7 +36,7 @@ import Data.List.NonEmpty qualified as NEL
 import Data.Map.Ordered qualified as OMap
 import Data.Map.Strict qualified as Map
 import Data.Scientific qualified as Scientific
-import Data.Set qualified as Set
+import Data.Set.Ordered qualified as OSet
 import Data.Text qualified as Text
 import GHC.Generics qualified as Generics
 
@@ -65,7 +66,7 @@ data SchemaObjectF r = SchemaObjectF
   , schemaEnum :: !(Maybe [Aeson.Value])
   , schemaConst :: !(Maybe Aeson.Value)
   , schemaProperties :: !(Maybe (OMap.OMap Text.Text r))
-  , schemaRequired :: !(Maybe (Set.Set Text.Text))
+  , schemaRequired :: !(Maybe (OSet.OSet Text.Text))
   , schemaAdditionalProperties :: !(Maybe r)
   , schemaPatternProperties :: !(Maybe (OMap.OMap Text.Text r))
   , schemaPropertyNames :: !(Maybe r)
@@ -254,14 +255,19 @@ parseOrderedObject parse =
    in
     Aeson.withObject "ordered properties" (fmap OMap.fromList . traverse parseEntry . KeyMap.toList)
 
-parseRequired :: Aeson.Value -> AesonTypes.Parser (Set.Set Text.Text)
+parseRequired :: Aeson.Value -> AesonTypes.Parser (OSet.OSet Text.Text)
 parseRequired value = do
   names <- Aeson.parseJSON value
+  either fail pure (validateRequired names)
+
+validateRequired :: [Text.Text] -> Either String (OSet.OSet Text.Text)
+validateRequired names =
   let
-    nameSet = Set.fromList names
-  if Set.size nameSet == length names
-    then pure nameSet
-    else fail "required must not contain duplicate property names"
+    nameSet = OSet.fromList names
+   in
+    if OSet.size nameSet == length names
+      then Right nameSet
+      else Left "required must not contain duplicate property names"
 
 parseMultipleOf :: Aeson.Value -> AesonTypes.Parser PositiveScientific
 parseMultipleOf value =
@@ -320,7 +326,7 @@ schemaObjectFields obj =
     , "enum" Aeson..?= schemaEnum obj
     , "const" Aeson..?= schemaConst obj
     , "properties" Aeson..?= fmap OrderedObject (schemaProperties obj)
-    , "required" Aeson..?= schemaRequired obj
+    , "required" Aeson..?= fmap Foldable.toList (schemaRequired obj)
     , "additionalProperties" Aeson..?= schemaAdditionalProperties obj
     , "patternProperties" Aeson..?= fmap OrderedObject (schemaPatternProperties obj)
     , "propertyNames" Aeson..?= schemaPropertyNames obj
