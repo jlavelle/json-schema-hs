@@ -91,13 +91,11 @@ instance FC.Fleece JsonSchemaGen where
     constrained (\obj -> obj{Schema.schemaFormat = Just (Text.pack formatString)})
 
   interpretObjectNamed name (ObjectAccum propFns requiredNames additionalPropFn) =
-    JsonSchemaGen $ \seen ->
+    named name $ \seen ->
       let
-        nameText = Text.pack (FC.nameToString name)
-        seenAfter = Set.insert nameText seen
-        accum = evalObjectAccum propFns additionalPropFn seenAfter
+        accum = evalObjectAccum propFns additionalPropFn seen
        in
-        hoistSelfRef nameText (objectAccumSchema requiredNames accum) (accumDefs accum) (accumRefs accum)
+        GenResult (objectAccumSchema requiredNames accum) (accumDefs accum) (accumRefs accum)
 
   constructor _f =
     ObjectAccum
@@ -133,8 +131,10 @@ instance FC.Fleece JsonSchemaGen where
   additionalFields _accessor schema =
     AdditionalFieldsWrap (interpretInner schema)
 
-  interpretValidateNamed _name _uncheck _check schema =
-    JsonSchemaGen (interpretInner schema)
+  interpretValidateNamed name _uncheck _check schema =
+    if name == FC.schemaName schema
+      then JsonSchemaGen (interpretInner schema)
+      else named name (interpretInner schema)
 
   interpretValidateAnonymous _uncheck _check schema =
     JsonSchemaGen (interpretInner schema)
@@ -149,15 +149,13 @@ instance FC.Fleece JsonSchemaGen where
           , Schema.schemaEnum = Just values
           }
 
-  interpretUnionNamed name (UnionMembersWrap memberFns) = JsonSchemaGen $ \seen ->
+  interpretUnionNamed name (UnionMembersWrap memberFns) = named name $ \seen ->
     let
-      nameText = Text.pack (FC.nameToString name)
-      seenAfter = Set.insert nameText seen
       (schemas, allDefs, allRefs) =
         foldMap
           ( \f ->
               let
-                GenResult s d r = f seenAfter
+                GenResult s d r = f seen
                in
                 (Seq.singleton s, d, r)
           )
@@ -168,7 +166,7 @@ instance FC.Fleece JsonSchemaGen where
             Just nelSchemas -> Schema.emptySchema{Schema.schemaAnyOf = Just nelSchemas}
             Nothing -> Schema.emptySchema
      in
-      hoistSelfRef nameText unionSchema allDefs allRefs
+      GenResult unionSchema allDefs allRefs
 
   unionMemberWithIndex _index schema =
     UnionMembersWrap (Seq.singleton (interpretInner schema))
@@ -177,10 +175,8 @@ instance FC.Fleece JsonSchemaGen where
     UnionMembersWrap (left <> right)
 
   interpretTaggedUnionNamed name tagProperty (TaggedUnionMembersWrap memberFns) =
-    JsonSchemaGen $ \seen ->
+    named name $ \seen ->
       let
-        nameText = Text.pack (FC.nameToString name)
-        seenAfter = Set.insert nameText seen
         tagPropName = Text.pack tagProperty
         addTagProp (tagValue, GenResult memberSchema defs refs) = case memberSchema of
           Schema.ObjectSchema obj ->
@@ -207,7 +203,7 @@ instance FC.Fleece JsonSchemaGen where
           foldMap
             ( \f ->
                 let
-                  GenResult s d r = addTagProp (f seenAfter)
+                  GenResult s d r = addTagProp (f seen)
                  in
                   (Seq.singleton s, d, r)
             )
@@ -218,7 +214,7 @@ instance FC.Fleece JsonSchemaGen where
               Just nelSchemas -> Schema.emptySchema{Schema.schemaOneOf = Just nelSchemas}
               Nothing -> Schema.emptySchema
        in
-        hoistSelfRef nameText taggedSchema allDefs allRefs
+        GenResult taggedSchema allDefs allRefs
 
   taggedUnionMemberWithTag tag (ObjectAccum propFns req addlPropFn) =
     let
@@ -315,7 +311,23 @@ interpretInner schema seen =
 
 refSchema :: Text.Text -> Schema.Schema
 refSchema name =
-  Schema.ObjectSchema Schema.emptySchema{Schema.schemaRef = Just (Schema.SchemaRef ("#/$defs/" <> name))}
+  let
+    pointerToken = Text.replace "/" "~1" . Text.replace "~" "~0" $ name
+   in
+    Schema.ObjectSchema Schema.emptySchema{Schema.schemaRef = Just (Schema.SchemaRef ("#/$defs/" <> pointerToken))}
+
+named :: FC.Name -> (Set.Set Text.Text -> GenResult) -> JsonSchemaGen a
+named name build =
+  let
+    nameText = Text.pack (FC.nameToString name)
+   in
+    JsonSchemaGen $ \seen ->
+      let
+        GenResult namedSchema defs refs = build (Set.insert nameText seen)
+       in
+        if Set.member nameText refs
+          then GenResult (refSchema nameText) (Map.insert nameText namedSchema defs) (Set.delete nameText refs)
+          else GenResult namedSchema defs refs
 
 constrained :: (Schema.SchemaObject -> Schema.SchemaObject) -> FC.Schema JsonSchemaGen a -> JsonSchemaGen a
 constrained constrain schema = JsonSchemaGen $ \seen ->
@@ -332,13 +344,13 @@ evalObjectAccum ::
   Maybe (Set.Set Text.Text -> GenResult) ->
   Set.Set Text.Text ->
   ObjectAccumResult
-evalObjectAccum propFns additionalPropFn seenAfter =
+evalObjectAccum propFns additionalPropFn seen =
   let
-    propResults = fmap (\f -> f seenAfter) propFns
+    propResults = fmap (\f -> f seen) propFns
     propSchemas = fmap resultSchema propResults
     (propDefs, propRefs) =
       foldMap (\r -> (resultDefs r, resultRefs r)) propResults
-    addlResult = fmap (\f -> f seenAfter) additionalPropFn
+    addlResult = fmap (\f -> f seen) additionalPropFn
     addlSchema = fmap resultSchema addlResult
     addlDefs = foldMap resultDefs addlResult
     addlRefs = foldMap resultRefs addlResult
@@ -349,27 +361,6 @@ evalObjectAccum propFns additionalPropFn seenAfter =
       , accumDefs = propDefs <> addlDefs
       , accumRefs = propRefs <> addlRefs
       }
-
-hoistSelfRef ::
-  Text.Text ->
-  Schema.Schema ->
-  Map.Map Text.Text Schema.Schema ->
-  Set.Set Text.Text ->
-  GenResult
-hoistSelfRef nameText namedSchema defs refs =
-  let
-    isSelfReferenced = Set.member nameText refs
-    finalDefs =
-      if isSelfReferenced
-        then Map.insert nameText namedSchema defs
-        else defs
-    finalRefs = Set.delete nameText refs
-    finalSchema =
-      if isSelfReferenced
-        then refSchema nameText
-        else namedSchema
-   in
-    GenResult finalSchema finalDefs finalRefs
 
 objectAccumSchema :: Seq.Seq Text.Text -> ObjectAccumResult -> Schema.Schema
 objectAccumSchema requiredNames accum =

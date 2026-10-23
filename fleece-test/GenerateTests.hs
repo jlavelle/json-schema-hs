@@ -75,6 +75,8 @@ generateTests =
         , HUnit.testCase "recursive tree validates" testRecursiveTreeValidates
         , HUnit.testCase "recursive tree rejects invalid" testRecursiveTreeRejectsInvalid
         , TastyH.testProperty "recursive tree decode validates" propRecursiveDecodeValidates
+        , HUnit.testCase "recursion through a named validate" testRecursionThroughNamedValidate
+        , HUnit.testCase "recursive name with pointer characters" testRecursiveNameWithPointerCharacters
         ]
     , Tasty.testGroup
         "unions"
@@ -777,3 +779,37 @@ propNullableDecodeValidates = H.property $ do
   case decodeWith nullableSchema jsonVal of
     Left err -> H.annotate err *> H.failure
     Right _ -> validatesProp jsonSchema jsonVal >>= H.assert
+
+newtype Forest = Forest [Forest]
+
+forestSchema :: (FC.Fleece t) => FC.Schema t Forest
+forestSchema =
+  FC.transformNamed "Forest" (\(Forest trees) -> trees) Forest (FC.list forestSchema)
+
+testRecursionThroughNamedValidate :: HUnit.Assertion
+testRecursionThroughNamedValidate = do
+  let
+    schema = schemaFor forestSchema
+    emptyArray = Aeson.Array Vector.empty
+  _ <- TestUtil.withinTimeout (Aeson.toJSON schema)
+  assertValidates
+    "nested forest"
+    schema
+    (Aeson.Array (Vector.fromList [Aeson.Array (Vector.singleton emptyArray), emptyArray]))
+  assertRejects "non-array leaf" schema (Aeson.Array (Vector.singleton (Aeson.Array (Vector.singleton (Aeson.Number 1)))))
+
+newtype Chain = Chain {chainNext :: Maybe Chain}
+
+chainSchema :: (FC.Fleece t) => FC.Schema t Chain
+chainSchema =
+  FC.objectNamed "a/b~c"
+    $ FC.constructor Chain
+      FC.#+ FC.optional "next" chainNext chainSchema
+
+testRecursiveNameWithPointerCharacters :: HUnit.Assertion
+testRecursiveNameWithPointerCharacters = do
+  let
+    schema = schemaFor chainSchema
+    link next = Aeson.Object (KeyMap.singleton (Key.fromText "next") next)
+  assertValidates "nested chain" schema (link (link (Aeson.Object KeyMap.empty)))
+  assertRejects "non-object link" schema (link (link (Aeson.Number 1)))
