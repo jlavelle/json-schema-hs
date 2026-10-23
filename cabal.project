@@ -1,8 +1,17 @@
-packages: .
+packages:
+  json-schema-hs
+  json-schema-hs-fleece
+  json-schema-hs-test
 
 tests: True
 
 package json-schema-hs
+  flags: +ci
+
+package json-schema-hs-fleece
+  flags: +ci
+
+package json-schema-hs-test
   flags: +ci
 
 source-repository-package

@@ -24,7 +24,7 @@ fi
 SUBCOMMAND="$1"
 shift || true
 
-BASELINE_DIR="$PWD/bench/baselines"
+BASELINE_DIR="$PWD/json-schema-hs/bench/baselines"
 BASELINE_FILE="$BASELINE_DIR/baseline.csv"
 
 case "$SUBCOMMAND" in

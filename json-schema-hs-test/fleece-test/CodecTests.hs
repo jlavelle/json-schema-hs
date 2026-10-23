@@ -10,20 +10,20 @@ import Data.Maybe qualified as Maybe
 import Fleece.Aeson qualified as FA
 import Hedgehog qualified as H
 import JsonSchema qualified as Schema
-import SchemaGen qualified
+import JsonSchema.Fleece qualified as Fleece
+import JsonSchema.OrderedDecoder qualified as OrderedDecoder
 import Test.Tasty qualified as Tasty
 import Test.Tasty.HUnit qualified as HUnit
 import Test.Tasty.Hedgehog qualified as TastyH
-import TestUtil qualified
 
-import JsonSchema.Fleece qualified as Fleece
-import JsonSchema.OrderedDecoder qualified as OrderedDecoder
+import SchemaGen qualified
+import TestUtil qualified
 
 tree :: IO Tasty.TestTree
 tree = do
   suiteFiles <- TestUtil.findJsonFiles (TestUtil.testSuitePath "tests/draft2020-12")
   remoteFiles <- TestUtil.findJsonFiles (TestUtil.testSuitePath "remotes")
-  metaschemaFiles <- TestUtil.findJsonFiles "data/metaschema/draft2020-12"
+  metaschemaFiles <- TestUtil.findJsonFiles "../json-schema-hs/data/metaschema/draft2020-12"
   pure
     $ Tasty.testGroup
       "codec agreement"
