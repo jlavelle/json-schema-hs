@@ -183,11 +183,11 @@ Schema.ObjectSchema
   Schema.emptySchema
     { Schema.schemaType = Just (NEL.singleton Schema.TypeObject)
     , Schema.schemaProperties = Just (OMap.fromList [("name", stringSchema)])
-    , Schema.schemaRequired = Just (Set.fromList ["name"])
+    , Schema.schemaRequired = Just (OSet.fromList ["name"])
     }
 ```
 
-`schemaProperties`, `schemaDefs`, and the other keyword maps are `OMap`s from `ordered-containers`. Keywords this library does not model land in `schemaExtraKeywords` and round-trip unchanged.
+`schemaProperties`, `schemaDefs`, and the other keyword maps are `OMap`s from `ordered-containers`, and `schemaRequired` is an `OSet`, so both keep their document order. Keywords this library does not model land in `schemaExtraKeywords` and round-trip unchanged.
 
 ## Fleece Support
 

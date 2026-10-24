@@ -6,7 +6,7 @@ import Data.Aeson.KeyMap qualified as KeyMap
 import Data.ByteString.Lazy qualified as LBS
 import Data.List.NonEmpty qualified as NEL
 import Data.Map.Ordered qualified as OMap
-import Data.Set qualified as Set
+import Data.Set.Ordered qualified as OSet
 import Data.Text qualified as Text
 import Data.Vector qualified as Vector
 import Test.Tasty.Bench qualified as Bench
@@ -278,7 +278,7 @@ mkPropertiesSchema n =
       Schema.emptySchema
         { Schema.schemaType = Just (NEL.singleton Schema.TypeObject)
         , Schema.schemaProperties = Just (OMap.fromList props)
-        , Schema.schemaRequired = Just (Set.fromList (fmap fst props))
+        , Schema.schemaRequired = Just (OSet.fromList (fmap fst props))
         , Schema.schemaAdditionalProperties = Just (Schema.BoolSchema False)
         }
 
@@ -367,7 +367,7 @@ mkNestedSchema depth =
           Schema.emptySchema
             { Schema.schemaType = Just (NEL.singleton Schema.TypeObject)
             , Schema.schemaProperties = Just (OMap.fromList [(Common.txt ("k" <> show i), inner)])
-            , Schema.schemaRequired = Just (Set.singleton (Common.txt ("k" <> show i)))
+            , Schema.schemaRequired = Just (OSet.singleton (Common.txt ("k" <> show i)))
             }
     )
     (Schema.ObjectSchema Schema.emptySchema{Schema.schemaType = Just (NEL.singleton Schema.TypeString)})
@@ -726,7 +726,7 @@ registryFixture =
     , namedSchema "https://example.test/record"
         $ Schema.emptySchema
           { Schema.schemaType = Just (NEL.singleton Schema.TypeObject)
-          , Schema.schemaRequired = Just (Set.fromList (fmap Common.txt ["id", "name"]))
+          , Schema.schemaRequired = Just (OSet.fromList (fmap Common.txt ["id", "name"]))
           , Schema.schemaProperties =
               Just
                 ( OMap.fromList
@@ -855,6 +855,6 @@ decodableSchema =
       Schema.emptySchema
         { Schema.schemaType = Just (NEL.singleton Schema.TypeObject)
         , Schema.schemaProperties = Just (OMap.fromList props)
-        , Schema.schemaRequired = Just (Set.fromList (fmap fst (take 50 props)))
+        , Schema.schemaRequired = Just (OSet.fromList (fmap fst (take 50 props)))
         , Schema.schemaAdditionalProperties = Just (Schema.BoolSchema False)
         }

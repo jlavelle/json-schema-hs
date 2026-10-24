@@ -18,6 +18,7 @@ import Data.List.NonEmpty qualified as NEL
 import Data.Map.Ordered qualified as OMap
 import Data.Scientific qualified as Scientific
 import Data.Set qualified as Set
+import Data.Set.Ordered qualified as OSet
 import Data.Text qualified as Text
 import Data.Vector qualified as Vector
 import Hedgehog qualified as H
@@ -179,7 +180,7 @@ genExtraKeywordsSchema = do
 genObjectSchema :: H.Gen Schema.Schema
 genObjectSchema = do
   props <- Gen.maybe (genPropertyMap genSchema)
-  required <- Gen.maybe . Gen.set (Range.linear 0 3) $ genFieldName
+  required <- Gen.maybe . fmap OSet.fromList . Gen.list (Range.linear 0 3) $ genFieldName
   addProps <- Gen.maybe genSchema
   patProps <- Gen.maybe $ do
     keys <- Gen.set (Range.linear 0 2) genSafePattern

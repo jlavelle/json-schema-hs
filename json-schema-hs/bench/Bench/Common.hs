@@ -30,7 +30,7 @@ import Data.Aeson.Key qualified as Key
 import Data.Aeson.KeyMap qualified as KeyMap
 import Data.List.NonEmpty qualified as NEL
 import Data.Map.Ordered qualified as OMap
-import Data.Set qualified as Set
+import Data.Set.Ordered qualified as OSet
 import Data.Text qualified as Text
 import Data.Vector qualified as Vector
 
@@ -109,7 +109,7 @@ recordSchema =
   Schema.ObjectSchema
     Schema.emptySchema
       { Schema.schemaType = Just (NEL.singleton Schema.TypeObject)
-      , Schema.schemaRequired = Just (Set.fromList (fmap txt ["id", "name", "active", "score", "tags"]))
+      , Schema.schemaRequired = Just (OSet.fromList (fmap txt ["id", "name", "active", "score", "tags"]))
       , Schema.schemaProperties =
           Just
             ( OMap.fromList
@@ -336,7 +336,7 @@ dynamicAnchorBaseSchema =
       { Schema.schemaId = Just (Schema.SchemaId (txt "https://example.test/dyn/base"))
       , Schema.schemaDynamicAnchor = Just (Schema.DynamicAnchor (txt "T"))
       , Schema.schemaType = Just (NEL.singleton Schema.TypeObject)
-      , Schema.schemaRequired = Just (Set.fromList (fmap txt ["id", "name"]))
+      , Schema.schemaRequired = Just (OSet.fromList (fmap txt ["id", "name"]))
       , Schema.schemaProperties =
           Just
             ( OMap.fromList
