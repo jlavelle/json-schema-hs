@@ -43,8 +43,8 @@ import Data.Time qualified as Time
 import Data.UUID.Types qualified as UUID
 import Net.IPv4 qualified as IPv4
 import Net.IPv6 qualified as IPv6
+import Text.Regex.Ecma262 qualified as Ecma262
 
-import JsonSchema.Validate.String qualified as VString
 import JsonSchema.Validate.Uri qualified as Uri
 
 newtype Format = Format {formatToText :: Text.Text}
@@ -350,9 +350,7 @@ relativeJsonPointerParser = do
 regexParser :: Atto.Parser ()
 regexParser = do
   s <- Atto.takeText
-  case VString.compilePattern s of
-    Just _ -> pure ()
-    Nothing -> fail "invalid regex"
+  Monad.unless (Ecma262.valid s) (fail "invalid regex")
 
 uuidParser :: Atto.Parser UUID.UUID
 uuidParser = do

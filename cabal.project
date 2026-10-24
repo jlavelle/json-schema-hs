@@ -1,9 +1,13 @@
 packages:
+  regex-ecma262
   json-schema-hs
   json-schema-hs-fleece
   json-schema-hs-test
 
 tests: True
+
+package regex-ecma262
+  flags: +ci
 
 package json-schema-hs
   flags: +ci

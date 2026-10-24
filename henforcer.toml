@@ -314,10 +314,10 @@ qualified = { qualifiedPost = true }
 alias = "TastyH"
 
 [[forAnyModule.allowedQualifications]]
-module = "Text.Regex.TDFA"
+module = "Text.Regex.Ecma262"
 [[forAnyModule.allowedQualifications.importScheme]]
 qualified = { qualifiedPost = true }
-alias = "Regex"
+alias = "Ecma262"
 
 [[forAnyModule.allowedQualifications]]
 module = "JsonSchema"
@@ -500,3 +500,153 @@ qualified = { qualifiedPost = true }
 module = "TestUtil"
 [[forAnyModule.allowedQualifications.importScheme]]
 qualified = { qualifiedPost = true }
+
+[[forAnyModule.allowedQualifications]]
+module = "Control.Monad.ST"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "ST"
+
+[[forAnyModule.allowedQualifications]]
+module = "Control.Monad.Trans.Class"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Trans"
+
+[[forAnyModule.allowedQualifications]]
+module = "Control.Monad.Trans.State.Strict"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "State"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Bits"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Bits"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.IntMap.Strict"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "IntMap"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Primitive.Array"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Array"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Primitive.ByteArray"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "ByteArray"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Primitive.MutVar"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "MutVar"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Primitive.PrimArray"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "PrimArray"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Text.Array"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "TextArray"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Text.Internal"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "TextInternal"
+
+[[forAnyModule.allowedQualifications]]
+module = "Data.Text.Unsafe"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "TextUnsafe"
+
+[[forAnyModule.allowedQualifications]]
+module = "GHC.Exts"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Exts"
+
+[[forAnyModule.allowedQualifications]]
+module = "Text.Regex.Ecma262.Internal.Charset"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Charset"
+
+[[forAnyModule.allowedQualifications]]
+module = "Text.Regex.Ecma262.Internal.Compile"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Compile"
+
+[[forAnyModule.allowedQualifications]]
+module = "Text.Regex.Ecma262.Internal.Dfa"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Dfa"
+
+[[forAnyModule.allowedQualifications]]
+module = "Text.Regex.Ecma262.Internal.Mode"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Mode"
+
+[[forAnyModule.allowedQualifications]]
+module = "Text.Regex.Ecma262.Internal.Parse"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Parse"
+
+[[forAnyModule.allowedQualifications]]
+module = "Text.Regex.Ecma262.Internal.Ranges"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Ranges"
+
+[[forAnyModule.allowedQualifications]]
+module = "Text.Regex.Ecma262.Internal.Regex"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Regex"
+
+[[forAnyModule.allowedQualifications]]
+module = "Text.Regex.Ecma262.Internal.Ucd"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Ucd"
+
+[[forAnyModule.allowedQualifications]]
+module = "Text.Regex.Ecma262.Internal.Utf8"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Utf8"
+
+[[forAnyModule.allowedQualifications]]
+module = "Text.Regex.Ecma262.Internal.Vm"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Vm"
+
+[[forAnyModule.allowedQualifications]]
+module = "Text.Regex.Ecma262.Internal.Ucd.Table"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Table"
+
+[[forAnyModule.allowedQualifications]]
+module = "Text.Regex.Ecma262.Internal.Ucd.Tables"
+[[forAnyModule.allowedQualifications.importScheme]]
+qualified = { qualifiedPost = true }
+alias = "Tables"

@@ -570,6 +570,7 @@ optionalSuiteFiles =
   , "optional/bignum"
   , "optional/dependencies-compatibility"
   , "optional/dynamicRef"
+  , "optional/ecmascript-regex"
   , "optional/float-overflow"
   , "optional/format-assertion"
   , "optional/id"
@@ -584,6 +585,7 @@ optionalFormatSuiteFiles =
   [ "optional/format/date"
   , "optional/format/date-time"
   , "optional/format/duration"
+  , "optional/format/ecmascript-regex"
   , "optional/format/email"
   , "optional/format/ipv4"
   , "optional/format/ipv6"
@@ -604,10 +606,8 @@ knownExcludedSuiteFiles =
     , "optional/format/iri-reference"
     , "optional/format/uri"
     , "optional/format/uri-reference"
-    , "optional/format/ecmascript-regex"
     , "optional/format/idn-email"
     , "optional/format/idn-hostname"
-    , "optional/ecmascript-regex"
     , "optional/cross-draft"
     ]
 
@@ -622,18 +622,16 @@ loadSuiteFile registry name = do
   bytes <- LBS.readFile path
   case Aeson.eitherDecode bytes of
     Left err -> pure . Tasty.testGroup name $ [HUnit.testCase "parse" . HUnit.assertFailure $ err]
-    Right groups -> pure . Tasty.testGroup name $ fmap (mkTestGroup name registry) groups
+    Right groups -> pure . Tasty.testGroup name $ fmap (mkTestGroup registry) groups
 
-mkTestGroup :: String -> Validate.Registry -> TestGroup -> Tasty.TestTree
-mkTestGroup suiteName registry group =
+mkTestGroup :: Validate.Registry -> TestGroup -> Tasty.TestTree
+mkTestGroup registry group =
   Tasty.testGroup (Text.unpack . testGroupDescription $ group)
-    $ case Map.lookup (suiteName, testGroupDescription group) skippedSuiteGroups of
-      Just reason -> [HUnit.testCase ("skipped: " <> Text.unpack reason) $ pure ()]
-      Nothing -> case TestUtil.decodeSchemaValue . testGroupSchema $ group of
-        Left err ->
-          [HUnit.testCase "schema decode" . HUnit.assertFailure $ err]
-        Right schema ->
-          fmap (mkTestCase registry schema) . testGroupTests $ group
+    $ case TestUtil.decodeSchemaValue . testGroupSchema $ group of
+      Left err ->
+        [HUnit.testCase "schema decode" . HUnit.assertFailure $ err]
+      Right schema ->
+        fmap (mkTestCase registry schema) . testGroupTests $ group
 
 data TestGroup = TestGroup
   { testGroupDescription :: Text.Text
@@ -660,15 +658,6 @@ instance Aeson.FromJSON TestCase where
     testData <- obj Aeson..: Key.fromText (Text.pack "data")
     valid <- obj Aeson..: Key.fromText (Text.pack "valid")
     pure TestCase{testCaseDescription = description, testCaseData = testData, testCaseValid = valid}
-
-skippedSuiteGroups :: Map.Map (String, Text.Text) Text.Text
-skippedSuiteGroups =
-  Map.fromList
-    [
-      ( ("pattern", Text.pack "pattern with Unicode property escape requires unicode mode")
-      , Text.pack "regex-tdfa has no unicode property escapes"
-      )
-    ]
 
 mkTestCase :: Validate.Registry -> Schema.Schema -> TestCase -> Tasty.TestTree
 mkTestCase registry schema tc =

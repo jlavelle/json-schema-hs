@@ -1,7 +1,8 @@
 # json-schema-hs
 
-A Haskell implementation of JSON Schema draft 2020-12, in three packages:
+A Haskell implementation of JSON Schema draft 2020-12, in four packages:
 
+- **regex-ecma262**: a pure Haskell ECMA-262 regex engine for `pattern`, `patternProperties`, and `format: regex`. It is a port of the OCaml `ecmaregex` engine of [Corvus.JsonSchema](https://github.com/corvus-dotnet/Corvus.JsonSchema) by Endjin, and is licensed, like Corvus.JsonSchema, under the Apache License 2.0. A pattern that the `u` flag grammar refuses is read with the Annex B grammar, and `format: regex` accepts only the `u` flag grammar. Its tests are Corvus.JsonSchema's V8 conformance data.
 - **json-schema-hs**: the validator and an aeson codec for schemas. Internals are in its public `json-schema-hs:core` sublibrary.
 - **json-schema-hs-fleece**: a [json-fleece](https://github.com/flipstone/json-fleece) codec for schemas, a Fleece decoder that keeps the key order of `properties`, `$defs` and the other keyword maps, and a Fleece backend that generates schemas. Only dependents of this package need json-fleece.
 - **json-schema-hs-test**: the test suites of both packages, and the helpers they share. It is not meant for release. The test suites live outside the packages they test because cabal cannot solve a test suite that depends, through the shared helpers, on its own package.
@@ -66,7 +67,6 @@ scripts/build
 Conformance is tested against the official [JSON Schema Test Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite). These parts are excluded:
 
 - Drafts other than 2020-12 (`optional/cross-draft`).
-- ECMA-262 regex semantics. `pattern`, `patternProperties`, and `format: regex` use POSIX regex-tdfa, so escapes like `\p{...}` and `\cX` are unsupported and `.` matches a newline (`optional/ecmascript-regex`, `optional/format/ecmascript-regex`, and the `\p{Letter}` group of `pattern`).
 - Full RFC grammars for the `hostname`, `uri`, and `uri-reference` formats. `uri` only checks for a scheme, and `uri-reference` only rejects the empty string.
 - The `iri` and `iri-reference` formats. Unknown formats are ignored.
 - IDN decoding for the `idn-email` and `idn-hostname` formats. They accept ASCII only.

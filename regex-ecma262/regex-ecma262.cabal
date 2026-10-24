@@ -1,0 +1,112 @@
+cabal-version: 3.0
+name: regex-ecma262
+version: 0.1.0.0
+synopsis: ECMA-262 regular expressions with the semantics JSON Schema requires
+description:
+  A pure Haskell ECMA-262 regex engine for the JSON Schema @pattern@ and
+  @patternProperties@ keywords and the @regex@ format. It is a port of the
+  OCaml ecmaregex library of Corvus.JsonSchema: a pattern is read with the
+  grammar of the u flag and then with the Annex B grammar, and matched by a
+  deterministic automaton over ASCII text or a backtracking matcher that
+  remembers failed positions. Unicode property data is Unicode 17.
+
+category: Text, Regex
+license: Apache-2.0
+license-file: LICENSE
+author: Nebula Lavelle
+maintainer: nebula@franticdream.xyz
+copyright: 2026 Nebula Lavelle, endjin limited
+build-type: Simple
+tested-with: ghc ==9.10.3
+extra-doc-files: NOTICE
+extra-source-files:
+  test/data/*.json
+
+flag ci
+  description: More strict ghc options used for development and ci, not intended for end-use.
+  manual: True
+  default: False
+
+common foundation
+  build-depends: base >=4.20 && <5
+
+  if flag(ci)
+    build-depends: henforcer
+    ghc-options:
+      -j
+      -fwrite-ide-info
+      -hiedir=.hie
+      -Weverything
+      -Werror
+      -Wno-missing-import-lists
+      -Wno-missing-local-signatures
+      -Wno-monomorphism-restriction
+      -Wno-missing-kind-signatures
+      -Wprepositive-qualified-module
+      -Wno-safe
+      -Wno-unsafe
+      -Wno-missing-safe-haskell-mode
+      -Wno-missing-deriving-strategies
+      -Wno-all-missed-specialisations
+      -Wno-missed-specialisations
+      -Wno-implicit-prelude
+      -Wno-missing-role-annotations
+      -Wno-unused-packages
+      -fplugin
+      Henforcer
+      -fplugin-opt
+      Henforcer:-c../henforcer.toml
+  default-extensions:
+    OverloadedStrings
+
+  default-language: GHC2024
+
+library
+  import: foundation
+  exposed-modules: Text.Regex.Ecma262
+  hs-source-dirs: src
+  build-depends:
+    regex-ecma262:internal,
+    text >=2.1 && <2.2,
+
+library internal
+  import: foundation
+  exposed-modules:
+    Text.Regex.Ecma262.Internal.Charset
+    Text.Regex.Ecma262.Internal.Compile
+    Text.Regex.Ecma262.Internal.Dfa
+    Text.Regex.Ecma262.Internal.Mode
+    Text.Regex.Ecma262.Internal.Parse
+    Text.Regex.Ecma262.Internal.Ranges
+    Text.Regex.Ecma262.Internal.Regex
+    Text.Regex.Ecma262.Internal.Ucd
+    Text.Regex.Ecma262.Internal.Ucd.Table
+    Text.Regex.Ecma262.Internal.Ucd.Tables
+    Text.Regex.Ecma262.Internal.Utf8
+    Text.Regex.Ecma262.Internal.Vm
+
+  hs-source-dirs: internal
+  ghc-prof-options: -fprof-late
+  build-depends:
+    containers >=0.7 && <0.8,
+    primitive >=0.9 && <0.10,
+    text >=2.1 && <2.2,
+    transformers >=0.6 && <0.7,
+
+test-suite regex-ecma262-test
+  import: foundation
+  type: exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is: Main.hs
+  ghc-options:
+    -threaded
+    -rtsopts
+
+  build-depends:
+    aeson >=2.2 && <2.3,
+    bytestring >=0.12 && <0.13,
+    regex-ecma262:internal,
+    tasty >=1.5 && <1.6,
+    tasty-hunit >=0.10 && <0.11,
+    text >=2.1 && <2.2,
+    vector >=0.13 && <0.14,

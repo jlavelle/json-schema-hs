@@ -3,13 +3,10 @@ module JsonSchema.Validate.String
   ) where
 
 import Data.Text qualified as Text
-import Text.Regex.TDFA qualified as Regex
+import Text.Regex.Ecma262 qualified as Ecma262
 
 compilePattern :: Text.Text -> Maybe (Text.Text -> Bool)
 compilePattern pat =
-  fmap
-    (Regex.match :: Regex.Regex -> Text.Text -> Bool)
-    (Regex.makeRegexOptsM patternCompOpt Regex.defaultExecOpt pat)
-
-patternCompOpt :: Regex.CompOption
-patternCompOpt = Regex.defaultCompOpt{Regex.multiline = False}
+  case Ecma262.compile pat of
+    Right regex -> Just (Ecma262.isMatch regex)
+    Left _ -> Nothing

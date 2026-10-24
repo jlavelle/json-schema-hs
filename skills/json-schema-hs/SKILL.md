@@ -218,7 +218,6 @@ What the generated schema says, beyond the obvious mapping:
 ## Anti-Patterns
 
 - `validateOn schema` inside a loop or a request handler: recompiles the schema on every call. Compile once and share the `Validator`.
-- `\d`, `\w`, `\p{...}`, or lookarounds in `pattern` and `patternProperties`: these use POSIX regex-tdfa, not ECMA-262, so `\d+` does not match `"12"`. Write `[0-9]+`.
 - Trusting `format` for `iri` or `iri-reference`: they are not builtin, so they pass unless registered with `withFormat`. The `hostname`, `uri`, and `idn-*` validators are permissive.
 - A hand-written JSON Schema next to a Fleece schema for the same type: they drift. Generate it with `toJsonSchema`.
 - `Aeson.decode` for a schema an editor or a diff will display: the keyword maps come back sorted. Use `OrderedDecoder.decode`.
