@@ -107,11 +107,12 @@ data Program = Program
 compileProgram :: Mode.Mode -> Int -> Tree -> Program
 compileProgram mode groupCount parsedRoot =
   let
-    root = simplify [] parsedRoot
-    referenced = backrefGroups root
+    simplified = simplify [] parsedRoot
+    referenced = backrefGroups simplified
     tracked = IntMap.fromList (zip (filter (`IntSet.member` referenced) [1 .. groupCount]) [0 ..])
-    slots = IntMap.size tracked
-    env = Env{envTracked = tracked, envMode = mode, envMemo = slots == 0}
+    memoizable = IntMap.null tracked
+    root = if memoizable then unrollCounted simplified else simplified
+    env = Env{envTracked = tracked, envMode = mode, envMemo = memoizable}
     initial =
       Compiler
         { compilerCode = IntMap.empty
@@ -148,7 +149,7 @@ compileProgram mode groupCount parsedRoot =
    in
     Program
       { programInsts = insts
-      , programGroups = slots
+      , programGroups = IntMap.size tracked
       , programLoops = compilerLoopCount compiler
       , programMode = mode
       , programAnchored = anchored
@@ -206,6 +207,56 @@ simplify inside n =
             then if low == 0 then Parse.Empty else body
             else Parse.Repeat low high greed body
       _ -> n
+
+unrollCounted :: Tree -> Tree
+unrollCounted n =
+  case n of
+    Parse.Cat subs -> Parse.Cat (fmap unrollCounted subs)
+    Parse.Alt subs -> Parse.Alt (fmap unrollCounted subs)
+    Parse.Group g sub -> Parse.Group g (unrollCounted sub)
+    Parse.Look direction sense sub -> Parse.Look direction sense (unrollCounted sub)
+    Parse.Repeat low high greed sub ->
+      let
+        body = unrollCounted sub
+        optional inner =
+          Parse.Alt (if greed == Parse.Greedy then [inner, Parse.Empty] else [Parse.Empty, inner])
+        nested k = optional (if k <= 1 then body else Parse.Cat [body, nested (k - 1)])
+        (extra, rest) =
+          case high of
+            Parse.Unbounded -> (1, [Parse.Repeat 0 Parse.Unbounded greed body])
+            Parse.Max m -> (m - low, [nested (m - low) | m > low])
+       in
+        if blocksMemo low high body && (treeSize body + copyOverhead) * (low + extra) <= maxUnrolled
+          then Parse.Cat (replicate low body <> rest)
+          else Parse.Repeat low high greed body
+    _ -> n
+
+blocksMemo :: Int -> Parse.RepeatMax -> Tree -> Bool
+blocksMemo low high body =
+  let
+    single = Maybe.isJust (singleStep body)
+    splitOnly =
+      (high == Parse.Unbounded && low <= 1)
+        || (low == 0 && high == Parse.Max 1 && not (nullable body))
+   in
+    high /= Parse.Max 0 && not single && not splitOnly
+
+singleStep :: Tree -> Maybe (Int, Charset.Charset, Bool)
+singleStep body =
+  case body of
+    Parse.Char r -> Just (r, Charset.none, False)
+    Parse.Set set | not (Charset.isEmpty set) -> Just (0, set, True)
+    _ -> Nothing
+
+treeSize :: Tree -> Int
+treeSize n =
+  1 + sum (fmap treeSize (Parse.children n))
+
+copyOverhead :: Int
+copyOverhead = 3
+
+maxUnrolled :: Int
+maxUnrolled = 1024
 
 consumes :: Tree -> Bool
 consumes n =
@@ -419,10 +470,7 @@ emitRepeat env direction low high greed body =
     highInt = case high of
       Parse.Max m -> m
       Parse.Unbounded -> unbounded
-    single = case body of
-      Parse.Char r -> Just (r, Charset.none, False)
-      Parse.Set set | not (Charset.isEmpty set) -> Just (0, set, True)
-      _ -> Nothing
+    single = singleStep body
     (clearLo, clearHi) = groupRange env body
     emitBody = do
       Monad.when (clearLo >= 0) (add_ (op OpClear){instA = clearLo, instB = clearHi})
