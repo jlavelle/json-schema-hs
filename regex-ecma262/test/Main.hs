@@ -2,6 +2,7 @@ module Main
   ( main
   ) where
 
+import Control.Exception qualified as Exception
 import Data.Aeson qualified as Aeson
 import Data.Aeson.Key qualified as Key
 import Data.Aeson.KeyMap qualified as KeyMap
@@ -13,6 +14,7 @@ import Data.List qualified as List
 import Data.Maybe qualified as Maybe
 import Data.Text qualified as Text
 import Data.Vector qualified as Vector
+import System.Timeout qualified as Timeout
 import Test.Tasty qualified as Tasty
 import Test.Tasty.HUnit qualified as HUnit
 
@@ -37,6 +39,8 @@ main = do
           ]
       , HUnit.testCase "sizes" (sizeCases sizes)
       , HUnit.testCase "needs" needCases
+      , HUnit.testCase "unrolled counts" unrolledCases
+      , HUnit.testCase "counts on non-ASCII texts" countsOnNonAscii
       ]
 
 loadJson :: FilePath -> IO Aeson.Value
@@ -295,16 +299,55 @@ needCases =
       , ("(?:a|(?=(?:b|c){3}))x{2}", 2, [0], [1])
       ] ::
         [(Text.Text, Int, [Int], [Int])]
-    check (p, need, loops, iterations) =
-      case Regex.compileWith Regex.BacktrackOnly p of
-        Left err -> failure ("compile " <> show p <> ": " <> Text.unpack (Regex.renderCompileError err))
-        Right re ->
-          let
-            got = Regex.needs re
-            want = (need, zip loops iterations)
-           in
-            if got /= want
-              then failure (show p <> ": needs " <> show got <> ", want " <> show want)
-              else mempty
+    check (counted, need, loops, iterations) =
+      let
+        p = keepCounters counted
+       in
+        checkNeeds p (need, zip loops iterations)
    in
     assertNone (foldMap check cases)
+
+keepCounters :: Text.Text -> Text.Text
+keepCounters p =
+  "()\\1" <> p
+
+checkNeeds :: Text.Text -> (Int, [(Int, Int)]) -> Failures
+checkNeeds p want =
+  case Regex.compileWith Regex.BacktrackOnly p of
+    Left err -> failure ("compile " <> show p <> ": " <> Text.unpack (Regex.renderCompileError err))
+    Right re ->
+      let
+        got = Regex.needs re
+       in
+        if got /= want
+          then failure (show p <> ": needs " <> show got <> ", want " <> show want)
+          else mempty
+
+unrolledCases :: HUnit.Assertion
+unrolledCases =
+  assertNone
+    . foldMap (uncurry checkNeeds)
+    $ [ ("(?:a|b){5}c", (6, []))
+      , ("(?:ab|cde){3,}?x", (7, []))
+      , ("(?:(?:a|bc){2}d){3}", (9, []))
+      , ("(?:a|){0,3}x", (1, []))
+      , ("(?:a|b){2000}c", (2001, [(1, 1)]))
+      ]
+
+countsOnNonAscii :: HUnit.Assertion
+countsOnNonAscii = do
+  let
+    nonAscii = "\252" <> Text.replicate 60 "a"
+    answer p =
+      case Regex.compile p of
+        Left err -> HUnit.assertFailure ("compile " <> show p <> ": " <> Text.unpack (Regex.renderCompileError err))
+        Right re -> do
+          got <- Timeout.timeout 2000000 (Exception.evaluate (Regex.isMatch re nonAscii))
+          HUnit.assertEqual (show p) (Just False) got
+  Foldable.traverse_
+    answer
+    [ "^(?:[\\s\\S]{1,4}){3,}x$"
+    , "^(?:[\\s\\S]+){3,}x$"
+    , "^(?:[\\s\\S]{1,4}){0,64}x$"
+    , "^(?:[\\s\\S]?){20}x$"
+    ]
