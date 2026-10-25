@@ -193,8 +193,8 @@ instance FC.Fleece JsonSchemaGen where
               GenResult
                 ( Schema.ObjectSchema
                     obj
-                      { Schema.schemaProperties = Just (existingProps OMap.|> (tagPropName, tagConstSchema))
-                      , Schema.schemaRequired = Just (existingReq OSet.|> tagPropName)
+                      { Schema.schemaProperties = Just ((tagPropName, tagConstSchema) OMap.|< existingProps)
+                      , Schema.schemaRequired = Just (tagPropName OSet.|< existingReq)
                       }
                 )
                 defs

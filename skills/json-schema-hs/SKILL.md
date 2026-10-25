@@ -210,7 +210,7 @@ taskJsonSchema = Generate.toJsonSchema taskSchema
 What the generated schema says, beyond the obvious mapping:
 
 - Objects allow unknown keys unless the Fleece object has `additionalFields`, which becomes `additionalProperties`.
-- `nullable s` becomes `anyOf [s, {"type": "null"}]`. `union` becomes `anyOf`. `taggedUnion` becomes `oneOf` with a `const` tag property on each member.
+- `nullable s` becomes `anyOf [s, {"type": "null"}]`. `union` becomes `anyOf`. `taggedUnion` becomes `oneOf` with a `const` tag property first in each member, so structured output writes the tag before the fields.
 - A named schema that refers to itself is hoisted into `$defs` under its Fleece name. Nothing else goes into `$defs`.
 - `describe` text becomes `description`. The outermost `describe` wins, and a `$ref` to a recursive schema keeps the `description` of its use site.
 - The checks inside `validate` and the inner shape of `jsonString` are dropped. A value can pass the generated schema and still fail `FA.decode`.

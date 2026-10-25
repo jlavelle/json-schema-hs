@@ -3,6 +3,7 @@ module GenerateTests (generateTests) where
 import Data.Aeson qualified as Aeson
 import Data.Aeson.Key qualified as Key
 import Data.Aeson.KeyMap qualified as KeyMap
+import Data.Foldable qualified as Foldable
 import Data.Int (Int32)
 import Data.List.NonEmpty qualified as NEL
 import Data.Map.Ordered qualified as OMap
@@ -81,6 +82,7 @@ generateTests =
     , Tasty.testGroup
         "unions"
         [ HUnit.testCase "nullable generates anyOf" testNullableGeneratesAnyOf
+        , HUnit.testCase "tagged union members list the tag first" testTaggedUnionTagFirst
         ]
     , Tasty.testGroup
         "decode-validates"
@@ -694,6 +696,30 @@ testNullableGeneratesAnyOf = do
             (wrappedArm `elem` arms)
         other -> HUnit.assertFailure ("expected anyOf with 2 elements, got " <> show other)
     _ -> HUnit.assertFailure "expected ObjectSchema"
+
+testTaggedUnionTagFirst :: HUnit.Assertion
+testTaggedUnionTagFirst =
+  let
+    schema =
+      schemaFor
+        . FC.taggedUnionNamed "Shape" "kind"
+        $ FC.taggedUnionMember @"circle" (FC.constructor Detail FC.#+ FC.required "radius" detailNote FC.text)
+          FC.#@ FC.taggedUnionMember @"label" (FC.constructor Detail FC.#+ FC.required "text" detailNote FC.text)
+    memberOrder member =
+      case member of
+        Schema.ObjectSchema obj ->
+          ( fmap (fmap fst . OMap.assocs) (Schema.schemaProperties obj)
+          , fmap Foldable.toList (Schema.schemaRequired obj)
+          )
+        Schema.BoolSchema _ -> (Nothing, Nothing)
+   in
+    case schema of
+      Schema.ObjectSchema obj ->
+        HUnit.assertEqual
+          "member property and required order"
+          (Just [(Just ["kind", "radius"], Just ["kind", "radius"]), (Just ["kind", "text"], Just ["kind", "text"])])
+          (fmap (fmap memberOrder . NEL.toList) (Schema.schemaOneOf obj))
+      Schema.BoolSchema _ -> HUnit.assertFailure "expected ObjectSchema"
 
 propTextDecodeValidates :: H.Property
 propTextDecodeValidates = H.property $ do
