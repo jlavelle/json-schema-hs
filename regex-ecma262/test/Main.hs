@@ -40,6 +40,7 @@ main = do
       , HUnit.testCase "sizes" (sizeCases sizes)
       , HUnit.testCase "needs" needCases
       , HUnit.testCase "unrolled counts" unrolledCases
+      , HUnit.testCase "backtracking" backtrackingCases
       , HUnit.testCase "counts on non-ASCII texts" countsOnNonAscii
       ]
 
@@ -333,6 +334,29 @@ unrolledCases =
       , ("(?:a|){0,3}x", (1, []))
       , ("(?:a|b){2000}c", (2001, [(1, 1)]))
       ]
+
+backtrackingCases :: HUnit.Assertion
+backtrackingCases =
+  assertNone
+    . foldMap (uncurry checkBacktracking)
+    $ [ ("(?:ab|c){5}x", Regex.Memoized)
+      , ("(?:(?:ab|c){8}){8}", Regex.Memoized)
+      , ("(?:(?:ab|c){64}){64}", Regex.Unmemoized)
+      , ("(?:a|b){2000}c", Regex.Unmemoized)
+      , ("(a)\\1|(?:b|c)*", Regex.Unmemoized)
+      ]
+
+checkBacktracking :: Text.Text -> Regex.Backtracking -> Failures
+checkBacktracking p want =
+  case Regex.compile p of
+    Left err -> failure ("compile " <> show p <> ": " <> Text.unpack (Regex.renderCompileError err))
+    Right re ->
+      let
+        got = Regex.backtracking re
+       in
+        if got /= want
+          then failure (show p <> ": " <> show got <> ", want " <> show want)
+          else mempty
 
 countsOnNonAscii :: HUnit.Assertion
 countsOnNonAscii = do

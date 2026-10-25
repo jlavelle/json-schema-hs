@@ -14,8 +14,9 @@ Matching is case sensitive, @^@ and @$@ match only at the ends of the text, and
 changes that for part of a source.
 
 A source with nested quantifiers can take exponential time on a text it does
-not match, as in any backtracking engine. A match is pure and allocates, so
-'System.Timeout.timeout' can interrupt one that is forced inside it.
+not match, as in any backtracking engine, unless 'backtracking' reports its
+regex 'Memoized'. A match is pure and allocates, so 'System.Timeout.timeout'
+can interrupt one that is forced inside it.
 -}
 module Text.Regex.Ecma262
   ( Regex.Regex
@@ -25,6 +26,8 @@ module Text.Regex.Ecma262
   , Regex.renderCompileError
   , Regex.isMatch
   , Regex.valid
+  , Regex.Backtracking (..)
+  , Regex.backtracking
   ) where
 
 import Text.Regex.Ecma262.Internal.Parse qualified as Parse

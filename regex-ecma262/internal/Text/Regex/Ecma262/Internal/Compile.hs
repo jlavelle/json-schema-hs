@@ -3,6 +3,7 @@ module Text.Regex.Ecma262.Internal.Compile
   , Quick (..)
   , Inst (..)
   , Program (..)
+  , Backtracking (..)
   , compileProgram
   , noMatch
   , maxMemoLoops
@@ -102,7 +103,19 @@ data Program = Program
   , programPoints :: !Int
   , programPrefix :: !(PrimArray.PrimArray Int)
   , programFirst :: !(Maybe Charset.Charset)
+  , programBacktracking :: !Backtracking
   }
+
+data Backtracking
+  = {- | Every point where a match can backtrack is memoized, so a match takes
+    time polynomial in the length of the text.
+    -}
+    Memoized
+  | {- | Some point is not memoized, as in a counted repeat too large to unroll
+    or a source with a backreference, so a match can take exponential time.
+    -}
+    Unmemoized
+  deriving (Eq, Show)
 
 compileProgram :: Mode.Mode -> Int -> Tree -> Program
 compileProgram mode groupCount parsedRoot =
@@ -120,6 +133,7 @@ compileProgram mode groupCount parsedRoot =
         , compilerLoopCount = 0
         , compilerOpenLoops = []
         , compilerPointCount = 0
+        , compilerBacktracking = Memoized
         }
     compiler = State.execState (emit env Forward root *> add_ (op OpMatch)) initial
     raw = Array.arrayFromList (IntMap.elems (compilerCode compiler))
@@ -157,6 +171,7 @@ compileProgram mode groupCount parsedRoot =
       , programPoints = compilerPointCount compiler
       , programPrefix = PrimArray.primArrayFromList (take maxPrefix prefix)
       , programFirst = first
+      , programBacktracking = compilerBacktracking compiler
       }
 
 type Tree = Parse.Node [Int]
@@ -173,6 +188,7 @@ data Compiler = Compiler
   , compilerLoopCount :: !Int
   , compilerOpenLoops :: ![OpenLoop]
   , compilerPointCount :: !Int
+  , compilerBacktracking :: !Backtracking
   }
 
 data OpenLoop = OpenLoop
@@ -440,12 +456,16 @@ withPoint env inst = do
     (ml0, mm0) = loopAt 0
     (ml1, mm1) = loopAt 1
   if not (envMemo env) || length loops > maxMemoLoops || not (all openLoopSimple loops)
-    then pure inst
+    then inst <$ unmemoized
     else do
       let
         point = compilerPointCount c + 1
       State.put c{compilerPointCount = point}
       pure inst{instM = point, instMl0 = ml0, instMl1 = ml1, instMm0 = mm0, instMm1 = mm1}
+
+unmemoized :: Emit ()
+unmemoized =
+  State.modify' (\c -> c{compilerBacktracking = Unmemoized})
 
 maxMemoLoops :: Int
 maxMemoLoops = 2
@@ -533,7 +553,7 @@ emitRepeat env direction low high greed body =
                     , instFlag = lazy
                     , instIter = if back then 0 else minLength body
                     }
-              pointed <- if simple then withPoint env loopInst else pure loopInst
+              pointed <- if simple then withPoint env loopInst else loopInst <$ unmemoized
               loop <- add pointed
               add_ (op OpLoopIter){instA = k}
               State.modify' (\c -> c{compilerOpenLoops = OpenLoop k low simple : compilerOpenLoops c})

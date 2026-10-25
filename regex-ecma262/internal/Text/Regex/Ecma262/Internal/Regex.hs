@@ -11,6 +11,8 @@ module Text.Regex.Ecma262.Internal.Regex
   , isMatchWith
   , automaton
   , needs
+  , Compile.Backtracking (..)
+  , backtracking
   ) where
 
 import Data.Foldable qualified as Foldable
@@ -127,6 +129,10 @@ valid source =
   case Parse.parse Mode.UnicodeMode source of
     Right _ -> True
     Left _ -> False
+
+backtracking :: Regex -> Compile.Backtracking
+backtracking =
+  Compile.programBacktracking . regexProgram
 
 isMatch :: Regex -> Text.Text -> Bool
 isMatch =
