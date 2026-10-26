@@ -13,7 +13,7 @@ description: >-
   `insertResource`, `withFormat`, `withFormatAssertion`, `checkSchema`,
   `dereference`, `ValidationError`, `ValidationErrorKind`, `errorContext`,
   `renderErrors`, `renderJsonPointer`, `SchemaObjectF`, `emptySchema`,
-  `schemaFleeceSchema`, or `toJsonSchema`. Out of scope — writing Fleece
+  `schemaFleeceSchema`, `toJsonSchema`, or `toJsonSchemaWith`. Out of scope — writing Fleece
   schemas (`json-fleece`), the `Union` machinery underneath
   (`shrubbery`).
 ---
@@ -212,6 +212,7 @@ What the generated schema says, beyond the obvious mapping:
 - Objects allow unknown keys unless the Fleece object has `additionalFields`, which becomes `additionalProperties`.
 - `nullable s` becomes `anyOf [s, {"type": "null"}]`. `union` becomes `anyOf`. `taggedUnion` becomes `oneOf` with a `const` tag property first in each member, so structured output writes the tag before the fields.
 - A named schema that refers to itself is hoisted into `$defs` under its Fleece name. Nothing else goes into `$defs`.
+- `toJsonSchemaWith HoistNamed` hoists every named object, union, tagged union and `validateNamed` schema, so a code generator such as json-schema-to-typescript names each type. A def that is only a `$ref` to a def used nowhere else takes that def's body, so `validateNamed "Event"` over `taggedUnionNamed "EventT"` yields one def, `Event`. A root used once is inlined rather than left as a `$ref`.
 - `describe` text becomes `description`. The outermost `describe` wins, and a `$ref` to a recursive schema keeps the `description` of its use site.
 - The checks inside `validate` and the inner shape of `jsonString` are dropped. A value can pass the generated schema and still fail `FA.decode`.
 

@@ -80,6 +80,10 @@ generateTests =
         , HUnit.testCase "recursive name with pointer characters" testRecursiveNameWithPointerCharacters
         ]
     , Tasty.testGroup
+        "hoist named"
+        [ HUnit.testCase "named schemas become defs and single-use aliases collapse" testHoistNamed
+        ]
+    , Tasty.testGroup
         "unions"
         [ HUnit.testCase "nullable generates anyOf" testNullableGeneratesAnyOf
         , HUnit.testCase "tagged union members list the tag first" testTaggedUnionTagFirst
@@ -839,3 +843,52 @@ testRecursiveNameWithPointerCharacters = do
     link next = Aeson.Object (KeyMap.singleton (Key.fromText "next") next)
   assertValidates "nested chain" schema (link (link (Aeson.Object KeyMap.empty)))
   assertRejects "non-object link" schema (link (link (Aeson.Number 1)))
+
+data Point = Point
+  { pointX :: Scientific.Scientific
+  , pointY :: Scientific.Scientific
+  }
+
+pointSchema :: (FC.Fleece t) => String -> FC.Schema t Point
+pointSchema name =
+  FC.objectNamed (FC.unqualifiedName name)
+    $ FC.constructor Point
+      FC.#+ FC.required "x" pointX FC.number
+      FC.#+ FC.required "y" pointY FC.number
+
+newtype Origin = Origin Point
+
+data Drawing = Drawing
+  { drawingOrigin :: Origin
+  , drawingCorner :: Point
+  , drawingTree :: Tree
+  }
+
+drawingSchema :: (FC.Fleece t) => FC.Schema t Drawing
+drawingSchema =
+  FC.objectNamed "Drawing"
+    $ FC.constructor Drawing
+      FC.#+ FC.required
+        "origin"
+        drawingOrigin
+        (FC.validateNamed "Origin" (\(Origin p) -> p) (Right . Origin) (pointSchema "OriginPoint"))
+      FC.#+ FC.required "corner" drawingCorner (pointSchema "Point")
+      FC.#+ FC.required "tree" drawingTree treeSchema
+
+testHoistNamed :: HUnit.Assertion
+testHoistNamed = do
+  let
+    schema = Generate.toJsonSchemaWith Generate.HoistNamed drawingSchema
+    point = Aeson.object [(Key.fromText "x", Aeson.Number 1), (Key.fromText "y", Aeson.Number 2)]
+    tree = Aeson.object [(Key.fromText "value", Aeson.String "leaf"), (Key.fromText "children", Aeson.Array Vector.empty)]
+    drawing origin = Aeson.object [(Key.fromText "origin", origin), (Key.fromText "corner", point), (Key.fromText "tree", tree)]
+  case schema of
+    Schema.ObjectSchema obj -> do
+      HUnit.assertEqual "root is inlined" Nothing (Schema.schemaRef obj)
+      HUnit.assertEqual
+        "def names"
+        (Just ["GenerateTests.Tree", "Origin", "Point"])
+        (fmap (fmap fst . OMap.assocs) (Schema.schemaDefs obj))
+    Schema.BoolSchema _ -> HUnit.assertFailure "expected ObjectSchema"
+  assertValidates "drawing validates" schema (drawing point)
+  assertRejects "bad origin rejects" schema (drawing (Aeson.String "nowhere"))

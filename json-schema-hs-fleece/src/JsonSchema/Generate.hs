@@ -1,7 +1,10 @@
 module JsonSchema.Generate
   ( JsonSchemaGen (..)
+  , GenContext (..)
   , GenResult (..)
+  , Hoisting (..)
   , toJsonSchema
+  , toJsonSchemaWith
   ) where
 
 import Data.Aeson qualified as Aeson
@@ -24,39 +27,50 @@ import Data.Word (Word16, Word32, Word64, Word8)
 import Fleece.Core qualified as FC
 import GHC.TypeLits qualified as TypeLits
 import JsonSchema qualified as Schema
+import JsonSchema.Validate qualified as Validate
 
 import JsonSchema.OrderedProperties qualified as OrderedProperties
 
 type JsonSchemaGen :: Kind.Type -> Kind.Type
-newtype JsonSchemaGen a = JsonSchemaGen {runJsonSchemaGen :: Set.Set Text.Text -> GenResult}
+newtype JsonSchemaGen a = JsonSchemaGen {runJsonSchemaGen :: GenContext -> GenResult}
+
+data Hoisting
+  = HoistRecursive
+  | HoistNamed
+  deriving stock (Eq, Show)
+
+data GenContext = GenContext
+  { contextHoisting :: !Hoisting
+  , contextSeen :: !(Set.Set Text.Text)
+  }
 
 instance FC.Fleece JsonSchemaGen where
   data Object JsonSchemaGen _object _constructor = ObjectAccum
-    { objectProps :: !(OMap.OMap Text.Text (Set.Set Text.Text -> GenResult))
+    { objectProps :: !(OMap.OMap Text.Text (GenContext -> GenResult))
     , objectRequiredNames :: !(Seq.Seq Text.Text)
-    , objectAdditionalProps :: !(Maybe (Set.Set Text.Text -> GenResult))
+    , objectAdditionalProps :: !(Maybe (GenContext -> GenResult))
     }
 
   newtype Field JsonSchemaGen _object _a
     = FieldWrap FieldData
 
   newtype AdditionalFields JsonSchemaGen _object _a
-    = AdditionalFieldsWrap (Set.Set Text.Text -> GenResult)
+    = AdditionalFieldsWrap (GenContext -> GenResult)
 
   newtype UnionMembers JsonSchemaGen _allTypes _handledTypes
-    = UnionMembersWrap (Seq.Seq (Set.Set Text.Text -> GenResult))
+    = UnionMembersWrap (Seq.Seq (GenContext -> GenResult))
 
   newtype TaggedUnionMembers JsonSchemaGen _allTags _handledTags
-    = TaggedUnionMembersWrap (Seq.Seq (Set.Set Text.Text -> (Text.Text, GenResult)))
+    = TaggedUnionMembersWrap (Seq.Seq (GenContext -> (Text.Text, GenResult)))
 
   interpretNumber _name = JsonSchemaGen (const (emptyResult (typeSchema Schema.TypeNumber)))
   interpretText _name = JsonSchemaGen (const (emptyResult (typeSchema Schema.TypeString)))
   interpretBoolean _name = JsonSchemaGen (const (emptyResult (typeSchema Schema.TypeBoolean)))
   interpretNull _name = JsonSchemaGen (const (emptyResult (typeSchema Schema.TypeNull)))
 
-  interpretArray _name schema = JsonSchemaGen $ \seen ->
+  interpretArray _name schema = JsonSchemaGen $ \context ->
     let
-      GenResult itemSchema defs refs = interpretInner schema seen
+      GenResult itemSchema defs refs = interpretInner schema context
      in
       GenResult
         ( Schema.ObjectSchema
@@ -68,9 +82,9 @@ instance FC.Fleece JsonSchemaGen where
         defs
         refs
 
-  interpretNullable _name schema = JsonSchemaGen $ \seen ->
+  interpretNullable _name schema = JsonSchemaGen $ \context ->
     let
-      GenResult innerSchema defs refs = interpretInner schema seen
+      GenResult innerSchema defs refs = interpretInner schema context
      in
       GenResult
         ( Schema.ObjectSchema
@@ -92,9 +106,9 @@ instance FC.Fleece JsonSchemaGen where
     constrained (\obj -> obj{Schema.schemaFormat = Just (Text.pack formatString)})
 
   interpretObjectNamed name (ObjectAccum propFns requiredNames additionalPropFn) =
-    named name $ \seen ->
+    named name $ \context ->
       let
-        accum = evalObjectAccum propFns additionalPropFn seen
+        accum = evalObjectAccum propFns additionalPropFn context
        in
         GenResult (objectAccumSchema requiredNames accum) (accumDefs accum) (accumRefs accum)
 
@@ -150,13 +164,13 @@ instance FC.Fleece JsonSchemaGen where
           , Schema.schemaEnum = Just values
           }
 
-  interpretUnionNamed name (UnionMembersWrap memberFns) = named name $ \seen ->
+  interpretUnionNamed name (UnionMembersWrap memberFns) = named name $ \context ->
     let
       (schemas, allDefs, allRefs) =
         foldMap
           ( \f ->
               let
-                GenResult s d r = f seen
+                GenResult s d r = f context
                in
                 (Seq.singleton s, d, r)
           )
@@ -176,7 +190,7 @@ instance FC.Fleece JsonSchemaGen where
     UnionMembersWrap (left <> right)
 
   interpretTaggedUnionNamed name tagProperty (TaggedUnionMembersWrap memberFns) =
-    named name $ \seen ->
+    named name $ \context ->
       let
         tagPropName = Text.pack tagProperty
         addTagProp (tagValue, GenResult memberSchema defs refs) = case memberSchema of
@@ -204,7 +218,7 @@ instance FC.Fleece JsonSchemaGen where
           foldMap
             ( \f ->
                 let
-                  GenResult s d r = addTagProp (f seen)
+                  GenResult s d r = addTagProp (f context)
                  in
                   (Seq.singleton s, d, r)
             )
@@ -221,9 +235,9 @@ instance FC.Fleece JsonSchemaGen where
     let
       tagValue = Text.pack (TypeLits.symbolVal tag)
      in
-      TaggedUnionMembersWrap . Seq.singleton $ \seen ->
+      TaggedUnionMembersWrap . Seq.singleton $ \context ->
         let
-          accum = evalObjectAccum propFns addlPropFn seen
+          accum = evalObjectAccum propFns addlPropFn context
          in
           (tagValue, GenResult (objectAccumSchema req accum) (accumDefs accum) (accumRefs accum))
 
@@ -257,9 +271,9 @@ instance OrderedProperties.OrderedProperties JsonSchemaGen where
   orderedProperties schema =
     FC.Schema
       (FC.annotateName (FC.schemaName schema) "ordered properties")
-      ( JsonSchemaGen $ \seen ->
+      ( JsonSchemaGen $ \context ->
           let
-            GenResult itemSchema defs refs = interpretInner schema seen
+            GenResult itemSchema defs refs = interpretInner schema context
            in
             GenResult
               ( Schema.ObjectSchema
@@ -280,7 +294,7 @@ data GenResult = GenResult
 
 data FieldData = FieldData
   { fieldName :: !Text.Text
-  , fieldGen :: !(Set.Set Text.Text -> GenResult)
+  , fieldGen :: !(GenContext -> GenResult)
   , fieldRequired :: !Requiredness
   }
 
@@ -301,39 +315,44 @@ typeSchema :: Schema.SchemaType -> Schema.Schema
 typeSchema ty =
   Schema.ObjectSchema Schema.emptySchema{Schema.schemaType = Just (NEL.singleton ty)}
 
-interpretInner :: FC.Schema JsonSchemaGen a -> Set.Set Text.Text -> GenResult
-interpretInner schema seen =
+interpretInner :: FC.Schema JsonSchemaGen a -> GenContext -> GenResult
+interpretInner schema context =
   let
     name = Text.pack (FC.nameToString (FC.schemaName schema))
    in
-    if Set.member name seen
+    if Set.member name (contextSeen context)
       then GenResult (refSchema name) Map.empty (Set.singleton name)
-      else runJsonSchemaGen (FC.schemaInterpreter schema) seen
+      else runJsonSchemaGen (FC.schemaInterpreter schema) context
 
 refSchema :: Text.Text -> Schema.Schema
 refSchema name =
-  let
-    pointerToken = Text.replace "/" "~1" . Text.replace "~" "~0" $ name
-   in
-    Schema.ObjectSchema Schema.emptySchema{Schema.schemaRef = Just (Schema.SchemaRef ("#/$defs/" <> pointerToken))}
+  Schema.ObjectSchema Schema.emptySchema{Schema.schemaRef = Just (defPointer name)}
 
-named :: FC.Name -> (Set.Set Text.Text -> GenResult) -> JsonSchemaGen a
+defPointer :: Text.Text -> Schema.SchemaRef
+defPointer name =
+  Schema.SchemaRef ("#" <> Validate.renderJsonPointer ["$defs", name])
+
+named :: FC.Name -> (GenContext -> GenResult) -> JsonSchemaGen a
 named name build =
   let
     nameText = Text.pack (FC.nameToString name)
    in
-    JsonSchemaGen $ \seen ->
+    JsonSchemaGen $ \context ->
       let
-        GenResult namedSchema defs refs = build (Set.insert nameText seen)
+        GenResult namedSchema defs refs =
+          build context{contextSeen = Set.insert nameText (contextSeen context)}
+        hoisted = case contextHoisting context of
+          HoistRecursive -> Set.member nameText refs
+          HoistNamed -> True
        in
-        if Set.member nameText refs
+        if hoisted
           then GenResult (refSchema nameText) (Map.insert nameText namedSchema defs) (Set.delete nameText refs)
           else GenResult namedSchema defs refs
 
 constrained :: (Schema.SchemaObject -> Schema.SchemaObject) -> FC.Schema JsonSchemaGen a -> JsonSchemaGen a
-constrained constrain schema = JsonSchemaGen $ \seen ->
+constrained constrain schema = JsonSchemaGen $ \context ->
   let
-    GenResult innerSchema defs refs = interpretInner schema seen
+    GenResult innerSchema defs refs = interpretInner schema context
     innerObject = case innerSchema of
       Schema.ObjectSchema obj -> obj
       Schema.BoolSchema _ -> Schema.emptySchema{Schema.schemaAllOf = Just (NEL.singleton innerSchema)}
@@ -341,17 +360,17 @@ constrained constrain schema = JsonSchemaGen $ \seen ->
     GenResult (Schema.ObjectSchema (constrain innerObject)) defs refs
 
 evalObjectAccum ::
-  OMap.OMap Text.Text (Set.Set Text.Text -> GenResult) ->
-  Maybe (Set.Set Text.Text -> GenResult) ->
-  Set.Set Text.Text ->
+  OMap.OMap Text.Text (GenContext -> GenResult) ->
+  Maybe (GenContext -> GenResult) ->
+  GenContext ->
   ObjectAccumResult
-evalObjectAccum propFns additionalPropFn seen =
+evalObjectAccum propFns additionalPropFn context =
   let
-    propResults = fmap (\f -> f seen) propFns
+    propResults = fmap (\f -> f context) propFns
     propSchemas = fmap resultSchema propResults
     (propDefs, propRefs) =
       foldMap (\r -> (resultDefs r, resultRefs r)) propResults
-    addlResult = fmap (\f -> f seen) additionalPropFn
+    addlResult = fmap (\f -> f context) additionalPropFn
     addlSchema = fmap resultSchema addlResult
     addlDefs = foldMap resultDefs addlResult
     addlRefs = foldMap resultRefs addlResult
@@ -409,10 +428,16 @@ formattedNumber fmt =
       }
 
 toJsonSchema :: FC.Schema JsonSchemaGen a -> Schema.Schema
-toJsonSchema schema =
+toJsonSchema = toJsonSchemaWith HoistRecursive
+
+toJsonSchemaWith :: Hoisting -> FC.Schema JsonSchemaGen a -> Schema.Schema
+toJsonSchemaWith hoisting schema =
   let
-    GenResult resultSchema defs _refs =
-      runJsonSchemaGen (FC.schemaInterpreter schema) Set.empty
+    GenResult generatedSchema generatedDefs _refs =
+      runJsonSchemaGen (FC.schemaInterpreter schema) (GenContext hoisting Set.empty)
+    (resultSchema, defs) = case hoisting of
+      HoistRecursive -> (generatedSchema, generatedDefs)
+      HoistNamed -> collapseAliases generatedSchema generatedDefs
     orderedDefs = Map.foldlWithKey' (\acc k v -> acc OMap.|> (k, v)) OMap.empty defs
    in
     if Map.null defs
@@ -427,3 +452,40 @@ toJsonSchema schema =
               { Schema.schemaDefs = Just orderedDefs
               , Schema.schemaAllOf = Just (NEL.singleton other)
               }
+
+collapseAliases :: Schema.Schema -> Map.Map Text.Text Schema.Schema -> (Schema.Schema, Map.Map Text.Text Schema.Schema)
+collapseAliases root defs =
+  let
+    uses = Map.unionsWith (+) (fmap refUses (root : Map.elems defs))
+    names = Map.fromList [(defPointer name, name) | name <- Map.keys defs]
+    singleUseTarget ref = do
+      target <- Map.lookup ref names
+      body <- Map.lookup target defs
+      if Map.lookup ref uses == Just 1 then Just (target, body) else Nothing
+    aliasOf = \case
+      Schema.ObjectSchema obj
+        | Just ref <- Schema.schemaRef obj
+        , obj{Schema.schemaRef = Nothing} == Schema.emptySchema ->
+            singleUseTarget ref
+      Schema.ObjectSchema _ -> Nothing
+      Schema.BoolSchema _ -> Nothing
+    rootCollapse =
+      [(body, Map.delete target defs) | Just (target, body) <- [aliasOf root]]
+    defCollapses =
+      [ (root, Map.insert alias body (Map.delete target defs))
+      | (alias, aliasSchema) <- Map.toList defs
+      , Just (target, body) <- [aliasOf aliasSchema]
+      , target /= alias
+      ]
+   in
+    case rootCollapse <> defCollapses of
+      (collapsedRoot, collapsedDefs) : _ -> collapseAliases collapsedRoot collapsedDefs
+      [] -> (root, defs)
+
+refUses :: Schema.Schema -> Map.Map Schema.SchemaRef Int
+refUses = \case
+  Schema.BoolSchema _ -> Map.empty
+  Schema.ObjectSchema obj ->
+    Map.unionsWith
+      (+)
+      (maybe Map.empty (`Map.singleton` 1) (Schema.schemaRef obj) : fmap refUses (Foldable.toList obj))

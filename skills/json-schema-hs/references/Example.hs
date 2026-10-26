@@ -31,7 +31,6 @@ import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
 import Fleece.Aeson qualified as FA
 import Fleece.Core qualified as FC
-
 import JsonSchema qualified as Schema
 import JsonSchema.Fleece qualified as SchemaFleece
 import JsonSchema.Generate qualified as Generate
